@@ -41,15 +41,23 @@ jobs:
           echo "git-sha-short=${git_sha::7}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}  # Use the correct token from repository secrets
-
+       
       - name: Get the latest release tag using GitHub CLI
         id: release-info
         run: |
-          tag_name=$(gh release view latest --json tagName -q .tagName)
-          echo "git-sha=${tag_name:17:7}" >> $GITHUB_OUTPUT
-          echo "helper-git-sha=${tag_name:25:7}" >> $GITHUB_OUTPUT
+          tag_name=$(gh release view latest --json tagName -q .tagName || echo "no_release")
+    
+          if [[ "$tag_name" == "no_release" ]]; then
+            echo "No releases found, proceeding without a release tag."
+            echo "git-sha=null" >> $GITHUB_OUTPUT
+            echo "helper-git-sha=null" >> $GITHUB_OUTPUT
+          else
+            echo "git-sha=${tag_name:17:7}" >> $GITHUB_OUTPUT
+            echo "helper-git-sha=${tag_name:25:7}" >> $GITHUB_OUTPUT
+          fi
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}  # Use the correct token from repository secrets
+
 
       - name: Check if there is newer commit
         run: |
