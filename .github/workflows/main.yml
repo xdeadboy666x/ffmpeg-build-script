@@ -48,7 +48,9 @@ jobs:
           tag_name=$(gh release view latest --json tagName -q .tagName)
           echo "git-sha=${tag_name:17:7}" >> $GITHUB_OUTPUT
           echo "helper-git-sha=${tag_name:25:7}" >> $GITHUB_OUTPUT
-
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          
       - name: Check if there is newer commit
         run: |
           if [[ "${{ steps.ffmpeg-info.outputs.git-sha-short }}" != "${{ steps.release-info.outputs.git-sha }}" ]]; then
