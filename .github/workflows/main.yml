@@ -18,6 +18,7 @@ jobs:
       - name: Get Latest Release Version
         id: get_version
         run: |
+          # Ensure you are getting the latest commit hash of the release/7.1 branch
           repo_version=$(git ls-remote https://github.com/FFmpeg/FFmpeg.git refs/heads/release/7.1 | awk '{print $1}')
           echo "Latest FFmpeg commit hash for release/7.1: $repo_version"
           echo "repo_version=$repo_version" >> $GITHUB_ENV
@@ -45,7 +46,7 @@ jobs:
       - name: Set up Build Environment
         run: |
           git fetch origin release/7.1
-          git checkout ${{ env.repo_version }}
+          git checkout release/7.1
 
       - name: Run FFMPEG Build Script
         run: |
@@ -64,4 +65,3 @@ jobs:
             ./bin/ffplay.exe
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
-
