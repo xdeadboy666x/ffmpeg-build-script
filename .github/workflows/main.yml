@@ -18,8 +18,8 @@ jobs:
       - name: Get Latest Release Version
         id: get_version
         run: |
-          repo_version=$(gh release view latest --json tagName -q .tagName)
-          echo "Latest FFmpeg release version: $repo_version"
+          repo_version=$(git ls-remote --tags https://github.com/FFmpeg/FFmpeg.git release/7.1 | awk -F'/' '{print $3}' | sort -V | tail -n 1)
+          echo "Latest FFmpeg release version for release/7.1: $repo_version"
           echo "repo_version=$repo_version" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
