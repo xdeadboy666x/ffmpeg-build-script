@@ -1360,8 +1360,11 @@ if [[ "$gpu_flag" -eq 1 ]]; then
     printf "\n%s\n" "An AMD GPU was detected without a Nvidia GPU present."
 fi
 
+
 # Source the compiler flags
 source_compiler_flags
+
+repo_version=$(gh release view latest --json tagName -q .tagName)
 
 if build "m4" "latest"; then
     download "https://ftp.gnu.org/gnu/m4/m4-latest.tar.xz"
@@ -1389,15 +1392,6 @@ if build "libtool" "$libtool_version"; then
     build_done "libtool" "$libtool_version"
 fi
 
-repo_version=$(gh release view latest --json tagName -q .tagName)
-
-if [ -z "$repo_version" ]; then
-    fail "repo_version is not set. Exiting..."
-fi
-
-repo_version=$(gh release view latest --json tagName -q .tagName)
-
-# Check if repo_version is empty
 if [ -z "$repo_version" ]; then
     fail "repo_version is not set. Exiting..."
 fi
