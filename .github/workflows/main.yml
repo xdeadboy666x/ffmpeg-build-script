@@ -40,7 +40,7 @@ jobs:
           echo "git-sha=$git_sha" >> $GITHUB_OUTPUT
           echo "git-sha-short=${git_sha::7}" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Get the latest release tag using GitHub CLI
         id: release-info
@@ -56,7 +56,7 @@ jobs:
           else
             echo "No new commit."
           fi
-
+          
     outputs:
       git-sha: ${{ steps.ffmpeg-info.outputs.git-sha }}
       git-sha-short: ${{ steps.ffmpeg-info.outputs.git-sha-short }}
@@ -70,15 +70,25 @@ jobs:
     strategy:
       matrix:
         os: [win64, win32]
-
+        
     steps:
-      - name: Checkout xdeadboy666x/ffmpeg-build-script
+      - name: Checkout ffmpeg-build-script repository
         uses: actions/checkout@v4
         with:
           repository: xdeadboy666x/ffmpeg-build-script
-          ref: ${{ needs.check.outputs.helper-git-sha }}
+          token: ${{ secrets.GH_PAT }}
           persist-credentials: false
-
+          ssh-strict: true
+          ssh-user: git
+          clean: true
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+          fetch-tags: false
+          show-progress: true
+          lfs: false
+          submodules: false
+          set-safe-directory: true
+          
       - name: Checkout FFmpeg
         uses: actions/checkout@v4
         with:
@@ -86,33 +96,33 @@ jobs:
           ref: ${{ needs.check.outputs.git-sha }}
           persist-credentials: false
           path: ffmpeg-source
-
+          
       - name: Install APT dependencies
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
           packages: ragel cvs yasm pax nasm gperf autogen autoconf-archive
-
+          
       - name: Install pip dependencies
         run: sudo -H pip3 -qq install meson ninja
-
+        
       - name: Get current FFmpeg git date
         id: git-date
         working-directory: ffmpeg-source
-        run: echo git-date=$(git log -1 --format=%ci) >> $GITHUB_OUTPUT
-
+        run: echo "git-date=$(git log -1 --format=%ci)" >> $GITHUB_OUTPUT
+        
       - name: Get current date & time before build
         id: date-time-before
-        run: echo date-time=$(date +'%Y-%m-%d %H:%M') >> $GITHUB_OUTPUT
-
+        run: echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
+        
       - name: Compile FFmpeg ${{ needs.check.outputs.git-sha-short }} using ffmpeg-build-script ${{ needs.check.outputs.helper-git-sha-short }}
         run: ./cross_compile_ffmpeg.sh --ffmpeg-source-dir=$GITHUB_WORKSPACE/ffmpeg-source --gcc-cpu-count=$(nproc) --disable-nonfree=n --sandbox-ok=y --compiler-flavors=${{ matrix.os }}
-
+        
       - name: Get current date & time after build
         id: date-time-after
         run: |
-          echo date-time=$(date +'%Y-%m-%d %H:%M') >> $GITHUB_OUTPUT
-          echo date-time-tag=$(date +'%Y-%m-%d-%H-%M') >> $GITHUB_OUTPUT
-
+          echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
+          echo "date-time-tag=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+          
       - name: Upload FFmpeg binaries
         uses: actions/upload-artifact@v4
         with:
@@ -123,7 +133,7 @@ jobs:
             ffmpeg-source/ffplay.exe
           if-no-files-found: error
           retention-days: ${{ inputs.no_release && '0' || '1' }}
-
+          
     outputs:
       date-time-before: ${{ steps.date-time-before.outputs.date-time }}
       date-time-after: ${{ steps.date-time-after.outputs.date-time }}
@@ -136,21 +146,21 @@ jobs:
     strategy:
       matrix:
         os: [win64, win32]
-
+        
     steps:
       - name: Download FFmpeg binaries
         uses: actions/download-artifact@v4
         with:
           name: ffmpeg-${{ matrix.os }}
-
+          
       - name: Create LICENSE
         run: |
           echo "This version of ffmpeg has nonfree parts compiled in." >> LICENSE
           echo "Therefore it is not legally redistributable." >> LICENSE
-
+          
       - name: 7-Zip FFmpeg binaries
         run: 7z a -mx9 ffmpeg-${{ needs.check.outputs.git-sha-short }}-${{ needs.check.outputs.helper-git-sha-short }}-${{ matrix.os }}-nonfree.7z ff{mpeg,probe,play}.exe LICENSE
-
+        
       - name: Upload FFmpeg archive
         uses: actions/upload-artifact@v4
         with:
@@ -158,7 +168,7 @@ jobs:
           path: ffmpeg-${{ needs.check.outputs.git-sha-short }}-${{ needs.check.outputs.helper-git-sha-short }}-${{ matrix.os }}-nonfree.7z
           retention-days: ${{ inputs.no_release && '0' || '1' }}
           compression-level: 0
-
+          
   release:
     needs: [check, build, archive]
     if: '! inputs.no_release'
@@ -169,7 +179,7 @@ jobs:
         with:
           pattern: ffmpeg-archive-*
           merge-multiple: true
-
+          
       - name: Release FFmpeg archives
         run: |
           gh release create "${{ needs.build.outputs.date-time-after-tag }}-${{ needs.check.outputs.git-sha-short }}-${{ needs.check.outputs.helper-git-sha-short }}" \
@@ -177,5 +187,5 @@ jobs:
           -n "FFmpeg nonfree git-${{ needs.check.outputs.git-sha }} in ${{ needs.build.outputs.git-date }} built on ${{ needs.build.outputs.date-time-after }} started at ${{ needs.build.outputs.date-time-before }} Using ${{ needs.check.outputs.helper-git-owner }}/ffmpeg-build-script git-${{ needs.check.outputs.helper-git-sha }}" \
           -t "${{ needs.build.outputs.date-time-after }} ${{ needs.check.outputs.git-sha-short }}"
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           GH_REPO: ${{ github.repository }}
