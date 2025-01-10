@@ -15,16 +15,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       
-      - name: Get Latest Release Version
-        id: get_version
-        run: |
-          # Ensure you are getting the latest commit hash of the release/7.1 branch
-          repo_version=$(git ls-remote https://github.com/FFmpeg/FFmpeg.git refs/heads/release/7.1 | awk '{print $1}')
-          echo "Latest FFmpeg commit hash for release/7.1: $repo_version"
-          echo "repo_version=$repo_version" >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-      
       - name: Install MinGW-w64 and Dependencies
         run: |
           sudo apt-get update
