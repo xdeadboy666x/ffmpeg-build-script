@@ -8,12 +8,15 @@ on:
       force_build:
         description: Disable checking for newer commit
         type: boolean
+        default: false
       no_release:
         description: Don't create release
         type: boolean
+        default: false
       use_own_fork:
         description: Use own ffmpeg-windows-build-helpers fork
         type: boolean
+        default: false
   watch:
     types: [started]
 
@@ -24,40 +27,33 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout FFmpeg repository
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
       - name: Get FFmpeg latest commit
         id: ffmpeg-info
         run: |
           git_sha=$(gh api repos/FFmpeg/FFmpeg/commits/master -q .sha)
           echo git-sha=$git_sha >> $GITHUB_OUTPUT
           echo git-sha-short=${git_sha::7} >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
           
-      - name: Get ${{ inputs.use_own_fork && github.repository_owner || 'rdp' }}/ffmpeg-windows-build-helpers latest commit
-        id: ffmpeg-helper-info
+      - name: Get the latest release tag using GitHub CLI
+        id: release-info
         run: |
-          git_owner=${{ inputs.use_own_fork && github.repository_owner || 'rdp' }}
-          git_sha=$(gh api repos/$git_owner/ffmpeg-windows-build-helpers/commits/master -q .sha)
-          echo git-owner=$git_owner >> $GITHUB_OUTPUT
-          echo git-sha=$git_sha >> $GITHUB_OUTPUT
-          echo git-sha-short=${git_sha::7} >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          
-      - name: Get ffmpeg-autobuild latest build
-        id: ffmpeg-autobuild-info
-        run: |
-          tag_name=$(gh api repos/$GITHUB_REPOSITORY/releases/latest -q .tag_name)
+          tag_name=$(gh release view latest --json tagName -q .tagName)
           echo git-sha=${tag_name:17:7} >> $GITHUB_OUTPUT
           echo helper-git-sha=${tag_name:25:7} >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          
+
       - name: Check if there is newer commit
-        if: '! inputs.force_build'
-        run: >
-          [[ "${{ steps.ffmpeg-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-autobuild-info.outputs.git-sha }}" ]] ||
-          [[ "${{ steps.ffmpeg-helper-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-autobuild-info.outputs.helper-git-sha }}" ]]
+        run: |
+          if [[ "${{ steps.ffmpeg-info.outputs.git-sha-short }}" != "${{ steps.release-info.outputs.git-sha }}" ]]; then
+            echo "Newer commit found. Proceeding with build."
+          else
+            echo "No new commit."
+          fi
           
     outputs:
       git-sha: ${{ steps.ffmpeg-info.outputs.git-sha }}
@@ -176,8 +172,7 @@ jobs:
         run: |
           gh release create "${{ needs.build.outputs.date-time-after-tag }}-${{ needs.check.outputs.git-sha-short }}-${{ needs.check.outputs.helper-git-sha-short }}" \
           ffmpeg-${{ needs.check.outputs.git-sha-short }}-${{ needs.check.outputs.helper-git-sha-short }}-{win64,win32}-nonfree.7z \
-          -n "FFmpeg nonfree git-${{ needs.check.outputs.git-sha }} in ${{ needs.build.outputs.git-date }} built on ${{ needs.build.outputs.date-time-after }} started at ${{ needs.build.outputs.date-time-before }}
-          Using ${{ needs.check.outputs.helper-git-owner }}/ffmpeg-windows-build-helpers git-${{ needs.check.outputs.helper-git-sha }}" \
+          -n "FFmpeg nonfree git-${{ needs.check.outputs.git-sha }} in ${{ needs.build.outputs.git-date }} built on ${{ needs.build.outputs.date-time-after }} started at ${{ needs.build.outputs.date-time-before }} Using ${{ needs.check.outputs.helper-git-owner }}/ffmpeg-windows-build-helpers git-${{ needs.check.outputs.helper-git-sha }}" \
           -t "${{ needs.build.outputs.date-time-after }} ${{ needs.check.outputs.git-sha-short }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
