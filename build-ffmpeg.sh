@@ -1389,13 +1389,24 @@ if build "libtool" "$libtool_version"; then
     build_done "libtool" "$libtool_version"
 fi
 
+repo_version=$(gh release view latest --json tagName -q .tagName)
+
+if [ -z "$repo_version" ]; then
+    fail "repo_version is not set. Exiting..."
+fi
+
 gnu_repo "https://pkgconfig.freedesktop.org/releases/"
 if build "pkg-config" "$repo_version"; then
+    # Ensure the URL is formed correctly
+    echo "Downloading pkg-config version $repo_version"
     download "https://pkgconfig.freedesktop.org/releases/pkg-config-$repo_version.tar.gz"
+    # Execute necessary steps
     execute autoconf
     execute ./configure --prefix="$workspace" --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
     execute make "-j$threads"
     execute sudo make install
+    
+    # Mark the build as done
     build_done "pkg-config" "$repo_version"
 fi
 
