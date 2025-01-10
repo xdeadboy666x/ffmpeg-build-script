@@ -38,8 +38,8 @@ jobs:
       # Step 3: Set up the build environment and run the FFMPEG build script
       - name: Run FFMPEG Build Script
         run: |
-          chmod +x xdeadboy666x/ffmpeg-build-script/blob/master/build-ffmpeg.sh
-          ./xdeadboy666x/ffmpeg-build-script/blob/master/build-ffmpeg.sh --build --enable-gpl-and-non-free --latest
+          chmod +x build-ffmpeg.sh
+          ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
