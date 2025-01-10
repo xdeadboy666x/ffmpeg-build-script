@@ -12,11 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
+      
+      - name: Set up GitHub CLI
+        run: |
+          sudo apt-get install gh
 
-      # Step 2: Install MinGW-w64 and dependencies
+      - name: Get Latest Release Version
+        id: get_version
+        run: |
+          repo_version=$(gh release view latest --json tagName -q .tagName)
+          echo "Latest FFmpeg release version: $repo_version"
+          echo "repo_version=$repo_version" >> $GITHUB_ENV
+
       - name: Install MinGW-w64 and Dependencies
         run: |
           sudo apt-get update
