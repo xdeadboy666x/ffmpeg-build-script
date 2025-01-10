@@ -953,7 +953,7 @@ check_nvidia_gpu() {
     found=0
     gpu_info=""
 
-    if ! grep -Eiq '(microsoft|slyfox1186)' /proc/version; then
+    if ! grep -Eiq '(microsoft|xdeadboy666x)' /proc/version; then
         if lspci | grep -qi nvidia; then
             is_nvidia_gpu_present="NVIDIA GPU detected"
         else
@@ -1395,11 +1395,20 @@ if [ -z "$repo_version" ]; then
     fail "repo_version is not set. Exiting..."
 fi
 
+repo_version=$(gh release view latest --json tagName -q .tagName)
+
+# Check if repo_version is empty
+if [ -z "$repo_version" ]; then
+    fail "repo_version is not set. Exiting..."
+fi
+
 gnu_repo "https://pkgconfig.freedesktop.org/releases/"
+
 if build "pkg-config" "$repo_version"; then
     # Ensure the URL is formed correctly
     echo "Downloading pkg-config version $repo_version"
     download "https://pkgconfig.freedesktop.org/releases/pkg-config-$repo_version.tar.gz"
+    
     # Execute necessary steps
     execute autoconf
     execute ./configure --prefix="$workspace" --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
