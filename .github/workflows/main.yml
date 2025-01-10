@@ -40,7 +40,7 @@ jobs:
           echo "git-sha=$git_sha" >> $GITHUB_OUTPUT
           echo "git-sha-short=${git_sha::7}" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the GH_TOKEN secret
+          GH_TOKEN: ${{ github.token }}  # Corrected token usage
 
       - name: Get the latest release tag using GitHub CLI
         id: release-info
@@ -98,11 +98,11 @@ jobs:
       - name: Get current FFmpeg git date
         id: git-date
         working-directory: ffmpeg-source
-        run: echo "git-date=$(git log -1 --format=%ci)" >> $GITHUB_OUTPUT
+        run: echo git-date=$(git log -1 --format=%ci) >> $GITHUB_OUTPUT
         
       - name: Get current date & time before build
         id: date-time-before
-        run: echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
+        run: echo date-time=$(date +'%Y-%m-%d %H:%M') >> $GITHUB_OUTPUT
         
       - name: Compile FFmpeg ${{ needs.check.outputs.git-sha-short }} using ffmpeg-windows-build-helpers ${{ needs.check.outputs.helper-git-sha-short }}
         run: ./cross_compile_ffmpeg.sh --ffmpeg-source-dir=$GITHUB_WORKSPACE/ffmpeg-source --gcc-cpu-count=$(nproc) --disable-nonfree=n --sandbox-ok=y --compiler-flavors=${{ matrix.os }}
@@ -110,8 +110,8 @@ jobs:
       - name: Get current date & time after build
         id: date-time-after
         run: |
-          echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
-          echo "date-time-tag=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+          echo date-time=$(date +'%Y-%m-%d %H:%M') >> $GITHUB_OUTPUT
+          echo date-time-tag=$(date +'%Y-%m-%d-%H-%M') >> $GITHUB_OUTPUT
           
       - name: Upload FFmpeg binaries
         uses: actions/upload-artifact@v4
@@ -177,5 +177,5 @@ jobs:
           -n "FFmpeg nonfree git-${{ needs.check.outputs.git-sha }} in ${{ needs.build.outputs.git-date }} built on ${{ needs.build.outputs.date-time-after }} started at ${{ needs.build.outputs.date-time-before }} Using ${{ needs.check.outputs.helper-git-owner }}/ffmpeg-windows-build-helpers git-${{ needs.check.outputs.helper-git-sha }}" \
           -t "${{ needs.build.outputs.date-time-after }} ${{ needs.check.outputs.git-sha-short }}"
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}  # Corrected token usage
           GH_REPO: ${{ github.repository }}
