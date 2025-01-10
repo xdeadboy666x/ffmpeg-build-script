@@ -15,6 +15,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       
+      - name: Get Latest Release Version
+        id: get_version
+        run: |
+          repo_version=$(curl -s https://github.com/FFmpeg/FFmpeg.git#release/7.1 | jq -r .tag_name)
+          echo "Latest FFmpeg release version: $repo_version"
+          echo "repo_version=$repo_version" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+
       - name: Install MinGW-w64 and Dependencies
         run: |
           sudo apt-get update
@@ -32,11 +41,6 @@ jobs:
             cmake \
             wget \
             git
-
-      - name: Set up Build Environment
-        run: |
-          git fetch --tags
-          git checkout n7.1
 
       - name: Run FFMPEG Build Script
         run: |
