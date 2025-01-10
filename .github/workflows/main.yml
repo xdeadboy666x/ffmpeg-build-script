@@ -44,7 +44,7 @@ jobs:
 
       - name: Set up Build Environment
         run: |
-          git fetch origin
+          git fetch origin release/7.1
           git checkout ${{ env.repo_version }}
 
       - name: Run FFMPEG Build Script
