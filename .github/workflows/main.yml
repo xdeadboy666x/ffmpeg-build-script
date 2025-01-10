@@ -35,8 +35,8 @@ jobs:
 
       - name: Set up Build Environment
         run: |
-          git fetch origin release/7.1
-          git checkout release/7.1
+          git fetch --tags
+          git checkout n7.1
 
       - name: Run FFMPEG Build Script
         run: |
