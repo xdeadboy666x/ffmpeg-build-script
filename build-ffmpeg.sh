@@ -1392,6 +1392,8 @@ if build "libtool" "$libtool_version"; then
     build_done "libtool" "$libtool_version"
 fi
 
+repo_version=$(gh release view latest --json tagName -q .tagName)
+
 if [ -z "$repo_version" ]; then
     fail "repo_version is not set. Exiting..."
 fi
