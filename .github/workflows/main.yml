@@ -21,7 +21,9 @@ jobs:
           repo_version=$(gh release view latest --json tagName -q .tagName)
           echo "Latest FFmpeg release version: $repo_version"
           echo "repo_version=$repo_version" >> $GITHUB_ENV
-
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+                  
       - name: Install MinGW-w64 and Dependencies
         run: |
           sudo apt-get update
@@ -46,7 +48,7 @@ jobs:
           chmod +x build-ffmpeg.sh
           ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
 
       # Step 4: Upload the compiled binaries
       - name: Upload Compiled Binaries
