@@ -1,0 +1,54 @@
+name: Cross-Compile FFMPEG, ffprobe, and ffplay for Windows
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-ffmpeg:
+    name: Cross-Compile FFMPEG, ffprobe, and ffplay for Windows
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Install MinGW-w64 and dependencies
+      - name: Install MinGW-w64 and Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-mingw-w64-x86-64 \
+            g++-mingw-w64-x86-64 \
+            make \
+            yasm \
+            nasm \
+            pkg-config \
+            zlib1g-dev \
+            libtool \
+            autoconf \
+            automake \
+            cmake \
+            wget \
+            git
+
+      # Step 3: Set up the build environment and run the FFMPEG build script
+      - name: Run FFMPEG Build Script
+        run: |
+          chmod +x ffmpeg-build-script/build-ffmpeg
+          ./ffmpeg-build-script/build-ffmpeg --build --enable-gpl-and-non-free --latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      # Step 4: Upload the compiled binaries
+      - name: Upload Compiled Binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: ffmpeg-binaries-windows-x64
+          path: |
+            ./bin/ffmpeg.exe
+            ./bin/ffprobe.exe 
+            ./bin/ffplay.exe
