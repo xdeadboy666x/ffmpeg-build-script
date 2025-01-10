@@ -44,9 +44,8 @@ jobs:
 
       - name: Set up Build Environment
         run: |
-          # Check out the specific commit from the release/7.1 branch
           git fetch origin
-          git checkout ${{ env.repo_version }}  # Checkout the latest commit hash fetched in the previous step
+          git checkout ${{ env.repo_version }}
 
       - name: Run FFMPEG Build Script
         run: |
