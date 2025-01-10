@@ -953,7 +953,7 @@ check_nvidia_gpu() {
     found=0
     gpu_info=""
 
-    if ! grep -Eiq '(microsoft|xdeadboy666x)' /proc/version; then
+    if ! grep -Eiq '(microsoft|slyfox1186)' /proc/version; then
         if lspci | grep -qi nvidia; then
             is_nvidia_gpu_present="NVIDIA GPU detected"
         else
@@ -1360,11 +1360,8 @@ if [[ "$gpu_flag" -eq 1 ]]; then
     printf "\n%s\n" "An AMD GPU was detected without a Nvidia GPU present."
 fi
 
-
 # Source the compiler flags
 source_compiler_flags
-
-repo_version=$(gh release view latest --json tagName -q .tagName)
 
 if build "m4" "latest"; then
     download "https://ftp.gnu.org/gnu/m4/m4-latest.tar.xz"
@@ -1392,26 +1389,13 @@ if build "libtool" "$libtool_version"; then
     build_done "libtool" "$libtool_version"
 fi
 
-repo_version=$(gh release view latest --json tagName -q .tagName)
-
-if [ -z "$repo_version" ]; then
-    fail "repo_version is not set. Exiting..."
-fi
-
 gnu_repo "https://pkgconfig.freedesktop.org/releases/"
-
 if build "pkg-config" "$repo_version"; then
-    # Ensure the URL is formed correctly
-    echo "Downloading pkg-config version $repo_version"
     download "https://pkgconfig.freedesktop.org/releases/pkg-config-$repo_version.tar.gz"
-    
-    # Execute necessary steps
     execute autoconf
     execute ./configure --prefix="$workspace" --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
     execute make "-j$threads"
     execute sudo make install
-    
-    # Mark the build as done
     build_done "pkg-config" "$repo_version"
 fi
 
