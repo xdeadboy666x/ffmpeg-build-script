@@ -45,11 +45,16 @@ jobs:
       - name: Get the latest release tag using GitHub CLI
         id: release-info
         run: |
-          tag_name=$(gh release view latest --json tagName -q .tagName)
+          tag_name=$(gh release view latest --json tagName -q .tagName || echo "no-release-found")
+          if [[ "$tag_name" == "no-release-found" ]]; then
+            echo "No release found."
+            exit 1
+          fi
           echo "git-sha=${tag_name:17:7}" >> $GITHUB_OUTPUT
           echo "helper-git-sha=${tag_name:25:7}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+
           
       - name: Check if there is newer commit
         run: |
@@ -189,5 +194,5 @@ jobs:
           -n "FFmpeg nonfree git-${{ needs.check.outputs.git-sha }} in ${{ needs.build.outputs.git-date }} built on ${{ needs.build.outputs.date-time-after }} started at ${{ needs.build.outputs.date-time-before }} Using ${{ needs.check.outputs.helper-git-owner }}/ffmpeg-build-script git-${{ needs.check.outputs.helper-git-sha }}" \
           -t "${{ needs.build.outputs.date-time-after }} ${{ needs.check.outputs.git-sha-short }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
           GH_REPO: ${{ github.repository }}
