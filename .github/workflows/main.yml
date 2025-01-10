@@ -15,12 +15,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       
-      - name: Set up GitHub CLI
-        run: |
-          sudo apt-get install gh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-
       - name: Get Latest Release Version
         id: get_version
         run: |
