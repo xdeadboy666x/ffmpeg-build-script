@@ -47,13 +47,6 @@ jobs:
             wget \
             git
 
-      - name: Debug Meson Setup
-        run: |
-          wget https://github.com/facebook/zstd/archive/refs/tags/v1.5.6.tar.gz -O libzstd-1.5.6.tar.gz
-          tar -xzf libzstd-1.5.6.tar.gz
-          cd zstd-1.5.6
-          meson setup build --prefix=$HOME/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false || (cat build/meson-logs/meson-log.txt && exit 1)
-
       - name: Run FFMPEG Build Script
         run: |
           chmod +x build-ffmpeg.sh
