@@ -18,7 +18,7 @@ jobs:
       - name: Get Latest Release Version
         id: get_version
         run: |
-          repo_version=$(curl -s https://github.com/FFmpeg/FFmpeg.git#release/7.1 | jq -r .tag_name)
+          repo_version=$(curl -s https://api.github.com/repos/FFmpeg/FFmpeg#releases/7.1 | jq -r .tag_name)
           echo "Latest FFmpeg release version: $repo_version"
           echo "repo_version=$repo_version" >> $GITHUB_ENV
         env:
