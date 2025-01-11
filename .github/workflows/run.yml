@@ -1,4 +1,4 @@
-name: Build FFmpeg for Windows
+name: Build FFmpeg with Meson and Ninja
 
 on:
   push:
@@ -7,55 +7,74 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   build-ffmpeg:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository (necessary for GitHub Actions to run)
+      # Checkout the repository
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.0
 
-     # Cache system dependencies
+      # Cache system dependencies
       - name: Cache System Dependencies
-        uses: actions/cache@v4.2.0
+        uses: actions/cache@v3
         with:
           path: /tmp/mingw-w64
           key: ${{ runner.os }}-mingw-w64-${{ hashFiles('**/build-ffmpeg.sh') }}
           restore-keys: |
             ${{ runner.os }}-mingw-w64-
 
-      # Install dependencies for cross-compilation (only if not cached)
+      # Install required dependencies
       - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential yasm pkg-config git \
-            mingw-w64 cmake nasm
+            mingw-w64 cmake nasm python3 python3-pip ninja-build \
+            meson
 
       # Clone FFmpeg build script
       - name: Clone FFmpeg Build Script
         run: git clone https://github.com/slyfox1186/ffmpeg-build-script.git
 
-      # Set up MinGW environment
+      # Set up MinGW environment for cross-compilation
       - name: Set up MinGW for Windows Cross-Compilation
         run: |
           export PATH=/usr/x86_64-w64-mingw32/bin:$PATH
           export CROSS_PREFIX=x86_64-w64-mingw32-
           echo "MinGW cross-compiler setup completed"
 
+      # Build Meson (version 1.4.0)
+      - name: Build Meson
+        run: |
+          curl -L https://github.com/mesonbuild/meson/archive/refs/tags/1.4.0.tar.gz -o meson-1.4.0.tar.gz
+          tar -xf meson-1.4.0.tar.gz
+          cd meson-1.4.0
+          python3 setup.py build
+          python3 setup.py install --prefix=/home/runner/tmp/ffmpeg-build-script/workspace
+
+      # Build libzstd (version 1.5.6)
+      - name: Build libzstd
+        run: |
+          curl -L https://github.com/facebook/zstd/archive/refs/tags/v1.5.6.tar.gz -o libzstd-1.5.6.tar.gz
+          tar -xf libzstd-1.5.6.tar.gz
+          cd zstd-1.5.6
+          meson setup build --prefix=/home/runner/tmp/ffmpeg-build-script/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false
+          ninja -j32 -C build
+          ninja -C build install
+
       # Change to the FFmpeg build script directory
       - name: Change Directory
         working-directory: ffmpeg-build-script
         run: echo "Changed to $(pwd)"
 
-      # Run the build script with cross-compilation flags
-      - name: Run FFmpeg Build Script for Windows
+      # Run FFmpeg Build Script for Windows with dynamic threads (using ninja)
+      - name: Run FFmpeg Build Script with Threads from ENV
         working-directory: ffmpeg-build-script
         run: |
           export TERM=xterm
-          bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest
+          bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest -j32
 
       # Store the build artifacts (Windows executables)
       - name: Upload Windows Executables
