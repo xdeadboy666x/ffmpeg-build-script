@@ -1363,6 +1363,12 @@ fi
 # Source the compiler flags
 source_compiler_flags
 
+if [ -f "meson.build" ]; then
+    meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false
+else
+    make PREFIX=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+    make install PREFIX=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+fi
 if build "m4" "latest"; then
     download "https://ftp.gnu.org/gnu/m4/m4-latest.tar.xz"
     execute ./configure --prefix="$workspace" --enable-c++ --enable-threads=posix
