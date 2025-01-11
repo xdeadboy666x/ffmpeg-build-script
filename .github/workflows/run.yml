@@ -18,7 +18,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Install dependencies for cross-compilation
+     # Cache system dependencies
+      - name: Cache System Dependencies
+        uses: actions/cache@v4.2.0
+        with:
+          path: /tmp/mingw-w64
+          key: ${{ runner.os }}-mingw-w64-${{ hashFiles('**/build-ffmpeg.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-mingw-w64-
+
+      # Install dependencies for cross-compilation (only if not cached)
       - name: Install Dependencies
         run: |
           sudo apt-get update
@@ -45,6 +54,7 @@ jobs:
       - name: Run FFmpeg Build Script for Windows
         working-directory: ffmpeg-build-script
         run: |
+          export TERM=xterm
           bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest
 
       # Store the build artifacts (Windows executables)
