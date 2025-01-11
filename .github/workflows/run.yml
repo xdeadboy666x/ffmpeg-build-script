@@ -65,7 +65,7 @@ jobs:
         working-directory: ffmpeg-build-script
         run: |
           export TERM=xterm
-          bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest -j32
+          bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free
 
       # Store the build artifacts (Windows executables)
       - name: Upload Windows Executables
