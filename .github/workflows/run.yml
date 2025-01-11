@@ -45,7 +45,7 @@ jobs:
       - name: Run FFmpeg Build Script for Windows
         working-directory: ffmpeg-build-script
         run: |
-          bash build-ffmpeg.sh --build --enable-gpl-and-non-free --latest --cross-compile --target-os=win32 --enable-static --enable-mingw
+          bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest
 
       # Store the build artifacts (Windows executables)
       - name: Upload Windows Executables
