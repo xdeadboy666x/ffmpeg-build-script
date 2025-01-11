@@ -1,6 +1,7 @@
 name: Build FFmpeg with Meson and Ninja
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
