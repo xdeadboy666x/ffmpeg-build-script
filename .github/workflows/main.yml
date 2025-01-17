@@ -18,6 +18,8 @@ jobs:
       - name: Install Dependencies
         run: |
           export TERM=xterm
+          export PREFIX=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+
           xargs sudo apt-get -y install < packages.txt
           sudo apt-get update
           sudo apt-get full-upgrade
