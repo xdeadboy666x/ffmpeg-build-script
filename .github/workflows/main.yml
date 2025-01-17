@@ -22,6 +22,9 @@ jobs:
           sudo apt-get update
           sudo apt-get full-upgrade
           sudo apt-get install -y \
+            libsamplerate-dev \
+            qtbase5-dev \
+            libsndfile1-dev \
             gcc-mingw-w64-x86-64 \
             g++-mingw-w64-x86-64 \
             make \
@@ -40,7 +43,7 @@ jobs:
             wget \
             git
           chmod +x build-ffmpeg.sh
-          bash build-ffmpeg.sh --build --enable-gpl-and-non-free --latest --compiler=gcc
+          bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free 
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
