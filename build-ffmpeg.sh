@@ -1799,8 +1799,9 @@ if "$NONFREE_AND_GPL"; then
     git_caller "https://github.com/breakfastquay/rubberband.git" "rubberband-git"
     if build "$repo_name" "${version//\$ /}"; then
         echo "Cloning \"$repo_name\" saving version \"$version\""
-        git_clone "$git_url"
-        execute make "-j$threads" PREFIX="$workspace" -f otherbuilds\Makefile.linux install-static
+        git clone "$git_url" "$repo_name"
+        cd "$repo_name"
+        execute make "-j$threads" PREFIX="$workspace" -f otherbuilds/Makefile.linux install-static
         build_done "$repo_name" "$version"
     fi
     CONFIGURE_OPTIONS+=("--enable-librubberband")
