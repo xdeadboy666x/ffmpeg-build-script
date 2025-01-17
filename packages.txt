@@ -17,8 +17,10 @@ gettext
 gperf
 imagemagick-6.q16
 meson
-ninja
+ninja-build
 pkg-config
+jo
+jq
 ladspa-sdk
 libbluray-dev
 libbs2b-dev
