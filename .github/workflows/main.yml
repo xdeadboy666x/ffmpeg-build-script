@@ -15,16 +15,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       
-      - name: Get Latest Release Version
-        id: get_version
-        run: |
-          repo_version=$(git ls-remote --tags https://github.com/FFmpeg/FFmpeg.git | grep "n7.1" | awk -F'/' '{print $3}' | sort -V | tail -n 1)
-          echo "Latest FFmpeg release version: $repo_version"
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
       - name: Install Dependencies
         run: |
           sudo apt-get update
