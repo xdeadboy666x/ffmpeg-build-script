@@ -39,8 +39,9 @@ jobs:
 
       - name: Run FFMPEG Build Script
         run: |
+          xargs sudo apt-get -y install < packages.txt
           chmod +x build-ffmpeg.sh
-          ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest
+          ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest --compiler=gcc
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
