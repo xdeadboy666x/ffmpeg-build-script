@@ -32,13 +32,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential yasm pkg-config git \
-            mingw-w64 cmake nasm python3 python3-pip ninja-build cmake \
-            meson
-
-      # Clone FFmpeg build script
-      - name: Clone FFmpeg Build Script
-        run: git clone https://github.com/slyfox1186/ffmpeg-build-script.git
-
+            mingw-w64 cmake nasm python3 python3-pip ninja-build meson \
+    
       # Set up MinGW environment for cross-compilation
       - name: Set up MinGW for Windows Cross-Compilation
         run: |
@@ -46,23 +41,8 @@ jobs:
           export CROSS_PREFIX=x86_64-w64-mingw32-
           echo "MinGW cross-compiler setup completed"
 
-      # Build Meson (version 1.4.0)
-      - name: Build Meson
-        run: |
-          curl -L https://github.com/mesonbuild/meson/archive/refs/tags/1.4.0.tar.gz -o meson-1.4.0.tar.gz
-          tar -xf meson-1.4.0.tar.gz
-          cd meson-1.4.0
-          python3 setup.py build
-          python3 setup.py install --prefix=/home/runner/tmp/ffmpeg-build-script/workspace
-
-      # Change to the FFmpeg build script directory
-      - name: Change Directory
-        working-directory: ffmpeg-build-script
-        run: echo "Changed to $(pwd)"
-
-      # Run FFmpeg Build Script for Windows with dynamic threads (using ninja)
-      - name: Run FFmpeg Build Script with Threads from ENV
-        working-directory: ffmpeg-build-script
+      # Run FFmpeg Build Scripta)
+      - name: Run FFmpeg Build Script
         run: |
           export TERM=xterm
           bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --compiler=gcc
