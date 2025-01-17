@@ -18,8 +18,9 @@ jobs:
       - name: Install Dependencies
         run: |
           export TERM=xterm
-          sudo apt-get update
           xargs sudo apt-get -y install < packages.txt
+          sudo apt-get update
+          sudo apt-get full-upgrade
           sudo apt-get install -y \
             gcc-mingw-w64-x86-64 \
             g++-mingw-w64-x86-64 \
@@ -37,8 +38,7 @@ jobs:
             automake \
             cmake \
             wget \
-            git \
-          sudo apt-get full-upgrade
+            git
 
       - name: Run FFMPEG Build Script
         run: |
