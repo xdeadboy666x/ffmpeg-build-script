@@ -39,9 +39,6 @@ jobs:
             cmake \
             wget \
             git
-
-      - name: Run FFMPEG Build Script
-        run: |
           chmod +x build-ffmpeg.sh
           bash build-ffmpeg.sh --build --enable-gpl-and-non-free --latest --compiler=gcc
         env:
