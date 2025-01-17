@@ -17,6 +17,7 @@ jobs:
       
       - name: Install Dependencies
         run: |
+          xargs sudo apt-get -y install < packages.txt
           sudo apt-get update
           sudo apt-get install -y \
             gcc-mingw-w64-x86-64 \
@@ -39,9 +40,8 @@ jobs:
 
       - name: Run FFMPEG Build Script
         run: |
-          xargs sudo apt-get -y install < packages.txt
           chmod +x build-ffmpeg.sh
-          ./build-ffmpeg.sh --build --enable-gpl-and-non-free --latest --compiler=gcc
+          bash build-ffmpeg.sh --build --enable-gpl-and-non-free --latest --compiler=gcc
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
