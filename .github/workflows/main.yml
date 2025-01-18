@@ -1,54 +1,5 @@
-name: Build Rubber Band and Cross-Compile FFmpeg
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  build-dependencies:
-    name: Build Dependencies
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y meson ninja-build pkg-config build-essential libsamplerate-dev
-          
-      - name: Build Rubber Band Library
-        run: |
-          git clone https://github.com/breakfastquay/rubberband.git
-          cd rubberband
-          meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
-          meson compile -C build
-          meson install -C build
-
-  build-ffmpeg:
-    name: Cross-Compile FFMPEG
-    needs: build-dependencies
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Build FFMPEG
-        run: |
-          chmod +x build-ffmpeg.sh
-          bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-
-      - name: Upload Compiled Binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: ffmpeg-binaries-windows-x64
-          path: |
-            ./bin/ffmpeg.exe
-            ./bin/ffprobe.exe
-            ./bin/ffplay.exe
+- name: Upload Rubber Band Artifacts
+     uses: actions/upload-artifact@v3
+     with:
+       name: rubberband-library
+       path: /home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
