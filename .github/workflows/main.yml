@@ -35,11 +35,13 @@ jobs:
           meson compile -C build
           meson install -C build
 
+      # Build libzstd
       - name: Build libzstd
         run: |
           curl -L https://github.com/facebook/zstd/archive/refs/tags/v1.5.6.tar.gz -o libzstd-1.5.6.tar.gz
           tar -xf libzstd-1.5.6.tar.gz
-          cd zstd-1.5.6
+          cd zstd-1.5.6  # Make sure we are in the correct directory after extraction
+          ls -la  # Check the extracted files to ensure meson.build exists
           meson setup build --prefix=/home/runner/tmp/ffmpeg-build-script/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false
           ninja -j32 -C build
           ninja -C build install
