@@ -28,15 +28,13 @@ jobs:
 
       - name: Build Ninja
         run: |
-          find_git_repo "ninja-build/ninja" "1" "T"
-          if build "ninja" "$repo_version"; then
-              download "https://github.com/ninja-build/ninja/archive/refs/tags/v$repo_version.tar.gz" "ninja-$repo_version.tar.gz"
-              re2c_path="$(command -v re2c)"
-              execute cmake -B build -DCMAKE_INSTALL_PREFIX="$workspace" -DCMAKE_BUILD_TYPE=Release -DRE2C="$re2c_path" -DBUILD_TESTING=OFF -Wno-dev
-              execute make "-j$threads" -C build
-              execute sudo make -C build install
-              build_done "ninja" "$repo_version"
-          fi
+          git clone https://github.com/ninja-build/ninja.git
+          cd ninja
+          git checkout "v1.10.0"  # replace with the desired version
+          re2c_path="$(command -v re2c)"
+          cmake -B build -DCMAKE_INSTALL_PREFIX="$workspace" -DCMAKE_BUILD_TYPE=Release -DRE2C="$re2c_path" -DBUILD_TESTING=OFF -Wno-dev
+          make "-j$(nproc)" -C build
+          sudo make -C build install
 
       - name: Build Rubber Band
         run: |
@@ -49,12 +47,11 @@ jobs:
       # Additional dependency builds (m4, autoconf, libtool, pkg-config, cmake, ninja, libzstd)
       - name: Build m4
         run: |
-          source_compiler_flags
           if build "m4" "latest"; then
               download "https://ftp.gnu.org/gnu/m4/m4-latest.tar.xz"
-              execute ./configure --prefix="$workspace" --enable-c++ --enable-threads=posix
-              execute make "-j$threads"
-              execute sudo make install
+              ./configure --prefix="$workspace" --enable-c++ --enable-threads=posix
+              make "-j$(nproc)"
+              sudo make install
               build_done "m4" "latest"
           fi
 
@@ -62,72 +59,50 @@ jobs:
         run: |
           if build "autoconf" "latest"; then
               download "https://ftp.gnu.org/gnu/autoconf/autoconf-latest.tar.xz"
-              execute autoreconf -fi
-              execute ./configure --prefix="$workspace" M4="$workspace/bin/m4"
-              execute make "-j$threads"
-              execute sudo make install
+              autoreconf -fi
+              ./configure --prefix="$workspace" M4="$workspace/bin/m4"
+              make "-j$(nproc)"
+              sudo make install
               build_done "autoconf" "latest"
           fi
 
       - name: Build libtool
         run: |
-          determine_libtool_version
-          if build "libtool" "$libtool_version"; then
-              download "https://ftp.gnu.org/gnu/libtool/libtool-$libtool_version.tar.xz"
-              execute ./configure --prefix="$workspace" --with-pic M4="$workspace/bin/m4"
-              execute make "-j$threads"
-              execute sudo make install
-              build_done "libtool" "$libtool_version"
+          if build "libtool" "latest"; then
+              download "https://ftp.gnu.org/gnu/libtool/libtool-latest.tar.xz"
+              ./configure --prefix="$workspace" --with-pic M4="$workspace/bin/m4"
+              make "-j$(nproc)"
+              sudo make install
+              build_done "libtool" "latest"
           fi
 
       - name: Build pkg-config
         run: |
-          gnu_repo "https://pkgconfig.freedesktop.org/releases/"
-          if build "pkg-config" "$repo_version"; then
-              download "https://pkgconfig.freedesktop.org/releases/pkg-config-$repo_version.tar.gz"
-              execute autoconf
-              execute ./configure --prefix="$workspace" --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
-              execute make "-j$threads"
-              execute sudo make install
-              build_done "pkg-config" "$repo_version"
+          if build "pkg-config" "latest"; then
+              download "https://pkgconfig.freedesktop.org/releases/pkg-config-latest.tar.gz"
+              autoconf
+              ./configure --prefix="$workspace" --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
+              make "-j$(nproc)"
+              sudo make install
+              build_done "pkg-config" "latest"
           fi
 
       - name: Build cmake
         run: |
-          find_git_repo "Kitware/CMake" "1" "T"
-          if build "cmake" "$repo_version"; then
-              download "https://github.com/Kitware/CMake/archive/refs/tags/v$repo_version.tar.gz" "cmake-$repo_version.tar.gz"
-              execute ./bootstrap --prefix="$workspace" --parallel="$threads" --enable-ccache
-              execute make "-j$threads"
-              execute sudo make install
-              build_done "cmake" "$repo_version"
-          fi
-
-      - name: Build meson
-        run: |
-          find_git_repo "mesonbuild/meson" "1" "T"
-          if build "meson" "$repo_version"; then
-              download "https://github.com/mesonbuild/meson/archive/refs/tags/$repo_version.tar.gz" "meson-$repo_version.tar.gz"
-              execute sudo python3 setup.py build
-              execute sudo python3 setup.py install --prefix="$workspace"
-              build_done "meson" "$repo_version"
-          fi
+          git clone https://github.com/Kitware/CMake.git
+          cd CMake
+          git checkout "v3.24.2"  # replace with the desired version
+          ./bootstrap --prefix="$workspace" --parallel=$(nproc) --enable-ccache
+          make "-j$(nproc)"
+          sudo make install
 
       - name: Build libzstd
         run: |
-          find_git_repo "facebook/zstd" "1" "T"
-          if build "libzstd" "$repo_version"; then
-              download "https://github.com/facebook/zstd/archive/refs/tags/v$repo_version.tar.gz" "libzstd-$repo_version.tar.gz"
-              cd "build/meson" || exit 1
-              execute meson setup build --prefix="$workspace" \
-                                        --buildtype=release \
-                                        --default-library=both \
-                                        --strip \
-                                        -Dbin_tests=false
-              execute ninja "-j$threads" -C build
-              execute sudo ninja -C build install
-              build_done "libzstd" "$repo_version"
-          fi
+          git clone https://github.com/facebook/zstd.git
+          cd zstd
+          git checkout "v1.5.2"  # replace with the desired version
+          make "-j$(nproc)"
+          sudo make install
 
       - name: Upload Rubber Band Artifacts
         uses: actions/upload-artifact@v3
