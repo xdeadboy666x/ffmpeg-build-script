@@ -112,14 +112,6 @@ jobs:
           make "-j$(nproc)"
           sudo make install
 
-      - name: Build libzstd
-        run: |
-          git clone https://github.com/facebook/zstd.git
-          cd zstd
-          git checkout "v1.5.2"  # replace with the desired version
-          make "-j$(nproc)"
-          sudo make install
-
       - name: Upload Rubber Band Artifacts
         uses: actions/upload-artifact@v3
         with:
