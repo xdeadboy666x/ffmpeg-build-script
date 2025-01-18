@@ -1,4 +1,4 @@
-name: Cross-Compile FFMPEG, ffprobe, and ffplay for Windows
+name: Build Rubber Band and Cross-Compile FFmpeg
 
 on:
   push:
@@ -7,45 +7,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-ffmpeg:
-    name: Cross-Compile FFMPEG, ffprobe, and ffplay for Windows
+  build-dependencies:
+    name: Build Dependencies
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      
+
       - name: Install Dependencies
         run: |
-          export TERM=xterm
-          export PREFIX=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
-
-          xargs sudo apt-get -y install < packages.txt
           sudo apt-get update
-          sudo apt-get full-upgrade
-          sudo apt-get install -y \
-            libsamplerate-dev \
-            qtbase5-dev \
-            libsndfile1-dev \
-            gcc-mingw-w64-x86-64 \
-            g++-mingw-w64-x86-64 \
-            make \
-            yasm \
-            nasm \
-            meson \
-            ninja-build \
-            pkg-config \
-            gcc \
-            g++ \
-            zlib1g-dev \
-            libtool \
-            autoconf \
-            automake \
-            cmake \
-            wget \
-            git
+          sudo apt-get install -y meson ninja-build pkg-config build-essential libsamplerate-dev
+          
+      - name: Build Rubber Band Library
+        run: |
+          git clone https://github.com/breakfastquay/rubberband.git
+          cd rubberband
+          meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+          meson compile -C build
+          meson install -C build
+
+  build-ffmpeg:
+    name: Cross-Compile FFMPEG
+    needs: build-dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build FFMPEG
+        run: |
           chmod +x build-ffmpeg.sh
-          bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free 
+          bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
@@ -55,7 +50,5 @@ jobs:
           name: ffmpeg-binaries-windows-x64
           path: |
             ./bin/ffmpeg.exe
-            ./bin/ffprobe.exe 
+            ./bin/ffprobe.exe
             ./bin/ffplay.exe
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
