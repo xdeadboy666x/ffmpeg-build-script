@@ -8,43 +8,126 @@ on:
 
 jobs:
   build-dependencies:
-    name: Build Rubber Band Library
+    name: Build Dependencies and Rubber Band Library
     runs-on: ubuntu-latest
 
     steps:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            meson ninja-build pkg-config build-essential libsamplerate-dev
+          sudo apt-get install -y --prefix="$workspace" \
+            meson ninja-build pkg-config build-essential libsamplerate-dev python3-pip python3-dev
 
-      # Build Meson (version 1.4.0)
-      - name: Build Meson
+      - name: Build Meson (version 1.4.0)
         run: |
           curl -L https://github.com/mesonbuild/meson/archive/refs/tags/1.4.0.tar.gz -o meson-1.4.0.tar.gz
           tar -xf meson-1.4.0.tar.gz
           cd meson-1.4.0
-          python3 setup.py build
-          python3 setup.py install --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+          sudo python3 setup.py build
+          sudo python3 setup.py install --prefix="$workspace"
 
-      - name: Build and Install Rubber Band
+      - name: Build Ninja
+        run: |
+          find_git_repo "ninja-build/ninja" "1" "T"
+          if build "ninja" "$repo_version"; then
+              download "https://github.com/ninja-build/ninja/archive/refs/tags/v$repo_version.tar.gz" "ninja-$repo_version.tar.gz"
+              re2c_path="$(command -v re2c)"
+              execute cmake -B build -DCMAKE_INSTALL_PREFIX="$workspace" -DCMAKE_BUILD_TYPE=Release -DRE2C="$re2c_path" -DBUILD_TESTING=OFF -Wno-dev
+              execute make "-j$threads" -C build
+              execute sudo make -C build install
+              build_done "ninja" "$repo_version"
+          fi
+
+      - name: Build Rubber Band
         run: |
           git clone https://github.com/breakfastquay/rubberband.git
           cd rubberband
-          meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --buildtype=release
+          meson setup build --prefix="$workspace" --buildtype=release
           meson compile -C build
           sudo meson install -C build
 
-      # Build libzstd
+      # Additional dependency builds (m4, autoconf, libtool, pkg-config, cmake, ninja, libzstd)
+      - name: Build m4
+        run: |
+          source_compiler_flags
+          if build "m4" "latest"; then
+              download "https://ftp.gnu.org/gnu/m4/m4-latest.tar.xz"
+              execute ./configure --prefix="$workspace" --enable-c++ --enable-threads=posix
+              execute make "-j$threads"
+              execute sudo make install
+              build_done "m4" "latest"
+          fi
+
+      - name: Build autoconf
+        run: |
+          if build "autoconf" "latest"; then
+              download "https://ftp.gnu.org/gnu/autoconf/autoconf-latest.tar.xz"
+              execute autoreconf -fi
+              execute ./configure --prefix="$workspace" M4="$workspace/bin/m4"
+              execute make "-j$threads"
+              execute sudo make install
+              build_done "autoconf" "latest"
+          fi
+
+      - name: Build libtool
+        run: |
+          determine_libtool_version
+          if build "libtool" "$libtool_version"; then
+              download "https://ftp.gnu.org/gnu/libtool/libtool-$libtool_version.tar.xz"
+              execute ./configure --prefix="$workspace" --with-pic M4="$workspace/bin/m4"
+              execute make "-j$threads"
+              execute sudo make install
+              build_done "libtool" "$libtool_version"
+          fi
+
+      - name: Build pkg-config
+        run: |
+          gnu_repo "https://pkgconfig.freedesktop.org/releases/"
+          if build "pkg-config" "$repo_version"; then
+              download "https://pkgconfig.freedesktop.org/releases/pkg-config-$repo_version.tar.gz"
+              execute autoconf
+              execute ./configure --prefix="$workspace" --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
+              execute make "-j$threads"
+              execute sudo make install
+              build_done "pkg-config" "$repo_version"
+          fi
+
+      - name: Build cmake
+        run: |
+          find_git_repo "Kitware/CMake" "1" "T"
+          if build "cmake" "$repo_version"; then
+              download "https://github.com/Kitware/CMake/archive/refs/tags/v$repo_version.tar.gz" "cmake-$repo_version.tar.gz"
+              execute ./bootstrap --prefix="$workspace" --parallel="$threads" --enable-ccache
+              execute make "-j$threads"
+              execute sudo make install
+              build_done "cmake" "$repo_version"
+          fi
+
+      - name: Build meson
+        run: |
+          find_git_repo "mesonbuild/meson" "1" "T"
+          if build "meson" "$repo_version"; then
+              download "https://github.com/mesonbuild/meson/archive/refs/tags/$repo_version.tar.gz" "meson-$repo_version.tar.gz"
+              execute sudo python3 setup.py build
+              execute sudo python3 setup.py install --prefix="$workspace"
+              build_done "meson" "$repo_version"
+          fi
+
       - name: Build libzstd
         run: |
-          curl -L https://github.com/facebook/zstd/archive/refs/tags/v1.5.6.tar.gz -o libzstd-1.5.6.tar.gz
-          tar -xf libzstd-1.5.6.tar.gz
-          cd zstd-1.5.6  # Make sure we are in the correct directory after extraction
-          ls -la  # Check the extracted files to ensure meson.build exists
-          meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false
-          ninja -j4 -C build
-          sudo ninja -C build install
+          find_git_repo "facebook/zstd" "1" "T"
+          if build "libzstd" "$repo_version"; then
+              download "https://github.com/facebook/zstd/archive/refs/tags/v$repo_version.tar.gz" "libzstd-$repo_version.tar.gz"
+              cd "build/meson" || exit 1
+              execute meson setup build --prefix="$workspace" \
+                                        --buildtype=release \
+                                        --default-library=both \
+                                        --strip \
+                                        -Dbin_tests=false
+              execute ninja "-j$threads" -C build
+              execute sudo ninja -C build install
+              build_done "libzstd" "$repo_version"
+          fi
 
       - name: Upload Rubber Band Artifacts
         uses: actions/upload-artifact@v3
