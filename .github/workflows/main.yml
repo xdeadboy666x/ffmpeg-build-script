@@ -17,7 +17,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             meson ninja-build pkg-config build-essential libsamplerate-dev
-          
+
+      # Build Meson (version 1.4.0)
+      - name: Build Meson
+        run: |
+          curl -L https://github.com/mesonbuild/meson/archive/refs/tags/1.4.0.tar.gz -o meson-1.4.0.tar.gz
+          tar -xf meson-1.4.0.tar.gz
+          cd meson-1.4.0
+          python3 setup.py build
+          python3 setup.py install --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+
       - name: Build and Install Rubber Band
         run: |
           git clone https://github.com/breakfastquay/rubberband.git
