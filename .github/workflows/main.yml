@@ -1,5 +1,61 @@
-- name: Upload Rubber Band Artifacts
-     uses: actions/upload-artifact@v3
-     with:
-       name: rubberband-library
-       path: /home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+name: Build Rubber Band and Cross-Compile FFmpeg
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-dependencies:
+    name: Build Rubber Band Library
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            meson ninja-build pkg-config build-essential libsamplerate-dev
+          
+      - name: Build and Install Rubber Band
+        run: |
+          git clone https://github.com/breakfastquay/rubberband.git
+          cd rubberband
+          meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --buildtype=release
+          meson compile -C build
+          meson install -C build
+
+      - name: Upload Rubber Band Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rubberband-library
+          path: /home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
+
+  build-ffmpeg:
+    name: Cross-Compile FFMPEG
+    needs: build-dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build FFMPEG
+        run: |
+          export TERM=xterm
+          export PKG_CONFIG_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib/pkgconfig:$PKG_CONFIG_PATH
+          export LD_LIBRARY_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib:$LD_LIBRARY_PATH
+          chmod +x build-ffmpeg.sh
+          bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free --enable-librubberband
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Upload Compiled Binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: ffmpeg-binaries-windows-x64
+          path: |
+            ./bin/ffmpeg.exe
+            ./bin/ffprobe.exe
+            ./bin/ffplay.exe
