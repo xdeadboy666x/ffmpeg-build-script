@@ -42,9 +42,9 @@ jobs:
           tar -xf libzstd-1.5.6.tar.gz
           cd zstd-1.5.6  # Make sure we are in the correct directory after extraction
           ls -la  # Check the extracted files to ensure meson.build exists
-          meson setup build --prefix=/home/runner/tmp/ffmpeg-build-script/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false
-          ninja -j32 -C build
-          ninja -C build install
+          meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false
+          ninja -j4 -C build
+          sudo ninja -C build install
 
       - name: Upload Rubber Band Artifacts
         uses: actions/upload-artifact@v3
