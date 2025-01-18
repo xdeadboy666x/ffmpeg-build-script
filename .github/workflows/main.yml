@@ -33,7 +33,7 @@ jobs:
           cd rubberband
           meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --buildtype=release
           meson compile -C build
-          meson install -C build
+          sudo meson install -C build
 
       # Build libzstd
       - name: Build libzstd
@@ -66,7 +66,7 @@ jobs:
           export TERM=xterm
           export PKG_CONFIG_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib/pkgconfig:$PKG_CONFIG_PATH
           export LD_LIBRARY_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib:$LD_LIBRARY_PATH
-          chmod +x build-ffmpeg.sh
+          sudo chmod +x build-ffmpeg.sh
           bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
