@@ -24,7 +24,7 @@ jobs:
           tar -xf meson-1.4.0.tar.gz
           cd meson-1.4.0
           sudo python3 setup.py build
-          sudo python3 setup.py install --prefix="$workspace"
+          sudo python3 setup.py install --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace
 
       - name: Download and Extract Ninja
         run: |
@@ -55,7 +55,7 @@ jobs:
         run: |
           git clone https://github.com/breakfastquay/rubberband.git
           cd rubberband
-          meson setup build --prefix="$workspace" --buildtype=release
+          meson setup build --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --buildtype=release
           meson compile -C build
           sudo meson install -C build
 
