@@ -35,6 +35,15 @@ jobs:
           meson compile -C build
           meson install -C build
 
+      - name: Build libzstd
+        run: |
+          curl -L https://github.com/facebook/zstd/archive/refs/tags/v1.5.6.tar.gz -o libzstd-1.5.6.tar.gz
+          tar -xf libzstd-1.5.6.tar.gz
+          cd zstd-1.5.6
+          meson setup build --prefix=/home/runner/tmp/ffmpeg-build-script/workspace --buildtype=release --default-library=both --strip -Dbin_tests=false
+          ninja -j32 -C build
+          ninja -C build install
+
       - name: Upload Rubber Band Artifacts
         uses: actions/upload-artifact@v3
         with:
