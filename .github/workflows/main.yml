@@ -15,7 +15,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --prefix="$workspace" \
+          sudo apt-get install -y \
             meson ninja-build pkg-config build-essential libsamplerate-dev python3-pip python3-dev
 
       - name: Build Meson (version 1.4.0)
