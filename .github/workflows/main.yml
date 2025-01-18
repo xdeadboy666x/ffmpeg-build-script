@@ -104,6 +104,7 @@ jobs:
 
       - name: Build cmake
         run: |
+          sudo apt-get install -y ccache
           git clone https://github.com/Kitware/CMake.git
           cd CMake
           git checkout "v3.24.2"  # replace with the desired version
