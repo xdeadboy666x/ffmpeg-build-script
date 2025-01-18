@@ -1796,13 +1796,11 @@ if build "libjpeg-turbo" "$repo_version"; then
 fi
 
 if "$NONFREE_AND_GPL"; then
-    git_caller "https://github.com/breakfastquay/rubberband.git" "rubberband-git"
+    git_caller "https://github.com/m-ab-s/rubberband.git" "rubberband-git"
     if build "$repo_name" "${version//\$ /}"; then
         echo "Cloning \"$repo_name\" saving version \"$version\""
-        git clone "$git_url" "$repo_name"
-        cd "$repo_name"
-        cd otherbuilds
-        execute make "-j$threads" PREFIX="$workspace" -f Makefile.linux install-static
+        git_clone "$git_url"
+        execute make "-j$threads" PREFIX="$workspace" install-static
         build_done "$repo_name" "$version"
     fi
     CONFIGURE_OPTIONS+=("--enable-librubberband")
