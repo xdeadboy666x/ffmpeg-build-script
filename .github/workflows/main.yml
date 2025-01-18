@@ -26,15 +26,30 @@ jobs:
           sudo python3 setup.py build
           sudo python3 setup.py install --prefix="$workspace"
 
+      - name: Download and Extract Ninja
+        run: |
+          curl -L https://github.com/ninja-build/ninja/archive/refs/tags/v1.12.1.tar.gz -o ninja-1.12.1.tar.gz
+          tar -xf ninja-1.12.1.tar.gz
+
       - name: Build Ninja
         run: |
-          git clone https://github.com/ninja-build/ninja.git
-          cd ninja
-          git checkout tags/v1.10.0  # explicitly checks out the tag
-          re2c_path="$(command -v re2c)"
-          cmake -B build -DCMAKE_INSTALL_PREFIX="$workspace" -DCMAKE_BUILD_TYPE=Release -DRE2C="$re2c_path" -DBUILD_TESTING=OFF -Wno-dev
-          make "-j$(nproc)" -C build
-          sudo make -C build install
+          cd ninja-1.12.1
+          cmake -B build -DCMAKE_INSTALL_PREFIX=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace -DCMAKE_BUILD_TYPE=Release -DRE2C= -DBUILD_TESTING=OFF -Wno-dev
+          make -j4 -C build
+
+      - name: Install Ninja
+        run: |
+          sudo make -C ninja-1.12.1/build install
+
+      - name: Verify Ninja Installation
+        run: |
+          ninja --version
+          
+      - name: Upload Ninja Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ninja-binaries
+          path: /home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/bin/ninja
 
       - name: Build Rubber Band
         run: |
