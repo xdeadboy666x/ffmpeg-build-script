@@ -30,7 +30,7 @@ jobs:
         run: |
           git clone https://github.com/ninja-build/ninja.git
           cd ninja
-          git checkout "v1.10.0"  # replace with the desired version
+          git checkout tags/v1.10.0  # explicitly checks out the tag
           re2c_path="$(command -v re2c)"
           cmake -B build -DCMAKE_INSTALL_PREFIX="$workspace" -DCMAKE_BUILD_TYPE=Release -DRE2C="$re2c_path" -DBUILD_TESTING=OFF -Wno-dev
           make "-j$(nproc)" -C build
