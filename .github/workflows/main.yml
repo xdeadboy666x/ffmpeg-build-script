@@ -64,7 +64,7 @@ jobs:
         run: |
           if build "m4" "latest"; then
               download "https://ftp.gnu.org/gnu/m4/m4-latest.tar.xz"
-              ./configure --prefix="$workspace" --enable-c++ --enable-threads=posix
+              ./configure --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --enable-c++ --enable-threads=posix
               make "-j$(nproc)"
               sudo make install
               build_done "m4" "latest"
@@ -75,7 +75,7 @@ jobs:
           if build "autoconf" "latest"; then
               download "https://ftp.gnu.org/gnu/autoconf/autoconf-latest.tar.xz"
               autoreconf -fi
-              ./configure --prefix="$workspace" M4="$workspace/bin/m4"
+              ./configure --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace M4="$workspace/bin/m4"
               make "-j$(nproc)"
               sudo make install
               build_done "autoconf" "latest"
@@ -85,7 +85,7 @@ jobs:
         run: |
           if build "libtool" "latest"; then
               download "https://ftp.gnu.org/gnu/libtool/libtool-latest.tar.xz"
-              ./configure --prefix="$workspace" --with-pic M4="$workspace/bin/m4"
+              ./configure --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --with-pic M4="$workspace/bin/m4"
               make "-j$(nproc)"
               sudo make install
               build_done "libtool" "latest"
@@ -96,7 +96,7 @@ jobs:
           if build "pkg-config" "latest"; then
               download "https://pkgconfig.freedesktop.org/releases/pkg-config-latest.tar.gz"
               autoconf
-              ./configure --prefix="$workspace" --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
+              ./configure --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --enable-silent-rules --with-pc-path="$PKG_CONFIG_PATH" --with-internal-glib
               make "-j$(nproc)"
               sudo make install
               build_done "pkg-config" "latest"
@@ -107,7 +107,7 @@ jobs:
           git clone https://github.com/Kitware/CMake.git
           cd CMake
           git checkout "v3.24.2"  # replace with the desired version
-          ./bootstrap --prefix="$workspace" --parallel=$(nproc) --enable-ccache
+          ./bootstrap --prefix=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace --parallel=$(nproc) --enable-ccache
           make "-j$(nproc)"
           sudo make install
 
