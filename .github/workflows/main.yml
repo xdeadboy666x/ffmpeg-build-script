@@ -14,11 +14,32 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build FFMPEG
+      - name: Install Dependencies
         run: |
           export TERM=xterm
+          xargs sudo apt-get -y install < packages.txt
           sudo apt-get update
-          sudo apt-get upgrade
+          sudo apt-get install -y \
+            libsamplerate-dev \
+            qtbase5-dev \
+            libsndfile1-dev \
+            gcc-mingw-w64-x86-64 \
+            g++-mingw-w64-x86-64 \
+            make \
+            yasm \
+            nasm \
+            meson \
+            ninja-build \
+            pkg-config \
+            gcc \
+            g++ \
+            zlib1g-dev \
+            libtool \
+            autoconf \
+            automake \
+            cmake \
+            wget \
+            git
           chmod +x build-ffmpeg.sh
           bash build-ffmpeg.sh --build --compiler=gcc --latest --enable-gpl-and-non-free -j 4
         env:
