@@ -33,7 +33,7 @@ jobs:
           sudo apt-get install -y meson ninja-build
           pip install meson --user
           sudo apt-get install -y build-essential pkg-config
-          bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free
+          bash build-ffmpeg.sh --build --latest --compiler=gcc --enable-gpl-and-non-free --cleanup
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
