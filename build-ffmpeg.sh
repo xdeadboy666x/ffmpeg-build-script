@@ -1580,14 +1580,15 @@ if build "libpng" "$repo_version"; then
     build_done "libpng" "$repo_version"
 fi
 
-find_git_repo "4720790" "3" "T"
-if build "libtiff" "$repo_version"; then
-    download "https://gitlab.com/libtiff/libtiff/-/archive/v$repo_version/libtiff-v$repo_version.tar.bz2" "libtiff-$repo_version.tar.bz2"
+git_caller "https://github.com/rouault/libtiff.git" "libtiff-git"
+if build "$repo_name" "${version//\$ /}"; then
+    echo "Cloning \"$repo_name\" saving version \"$version\""
+    git_clone "$git_url"
     execute ./autogen.sh
     execute ./configure --prefix="$workspace" --disable-{docs,sphinx,tests} --enable-cxx --with-pic
     execute make "-j$threads"
     execute sudo make install
-    build_done "libtiff" "$repo_version"
+    build_done "$repo_name" "$version"
 fi
 
 if "$NONFREE_AND_GPL"; then
