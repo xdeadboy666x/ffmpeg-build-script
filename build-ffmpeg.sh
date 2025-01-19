@@ -1426,6 +1426,7 @@ if build "ninja" "$repo_version"; then
     build_done "ninja" "$repo_version"
 fi
 
+find_git_repo "facebook/zstd" "1" "T"
 if build "libzstd" "$repo_version"; then
     execute sudo apt-get install -y build-essential zlib1g-dev liblzma-dev liblz4-dev
     download "https://github.com/facebook/zstd/releases/download/v1.5.6/zstd-1.5.6.tar.gz" "libzstd-1.5.6.tar.gz"
