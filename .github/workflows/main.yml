@@ -1,9 +1,11 @@
 name: Build Rubber Band and Cross-Compile FFmpeg
-'on':
+
+on:
   push:
     branches:
       - main
-  workflow_dispatch: null
+  workflow_dispatch:
+
 jobs:
   build-dependencies:
     name: Build Dependencies and Rubber Band Library
@@ -13,27 +15,25 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get full-upgrade
-    build-ffmpeg:
-      - name: Cross-Compile FFMPEG
-        needs: build-dependencies
-        runs-on: ubuntu-latest
+
+  build-ffmpeg:
+    name: Cross-Compile FFMPEG
+    needs: build-dependencies
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Build FFMPEG
-        run: >
+        run: |
           export TERM=xterm
-
-          export
-          PKG_CONFIG_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib/pkgconfig:$PKG_CONFIG_PATH
-
-          export
-          LD_LIBRARY_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib:$LD_LIBRARY_PATH
-
+          export PKG_CONFIG_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib/pkgconfig:$PKG_CONFIG_PATH
+          export LD_LIBRARY_PATH=/home/runner/work/ffmpeg-build-script/ffmpeg-build-script/workspace/lib:$LD_LIBRARY_PATH
           sudo chmod +x build-ffmpeg.sh
-
           bash build-ffmpeg.sh --build --compiler=gcc --enable-gpl-and-non-free
         env:
-          GH_TOKEN: '${{ secrets.GH_PAT }}'
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+
       - name: Upload Compiled Binaries
         uses: actions/upload-artifact@v3
         with:
