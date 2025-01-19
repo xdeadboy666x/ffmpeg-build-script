@@ -1427,9 +1427,9 @@ if build "ninja" "$repo_version"; then
 fi
 
 if build "libzstd" "$repo_version"; then
-    download "https://github.com/facebook/zstd/archive/refs/tags/v$repo_version.tar.gz" "libzstd-$repo_version.tar.gz"
-    cd "build/meson" || exit 1
     execute sudo apt-get install -y build-essential zlib1g-dev liblzma-dev liblz4-dev
+    download "https://github.com/facebook/zstd/archive/refs/tags/v$repo_version.tar.gz" "libzstd-$repo_version.tar.gz"
+    cd "zstd-$repo_version/build/meson" || exit 1
     execute meson setup build --prefix="$workspace" \
                               --buildtype=release \
                               --default-library=both \
