@@ -1,4 +1,4 @@
-name: Build Rubber Band and Cross-Compile FFmpeg
+name: Cross-Compile FFmpeg
 
 on:
   push:
@@ -7,18 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-dependencies:
-    name: Build Dependencies and Rubber Band Library
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get full-upgrade
-
   build-ffmpeg:
     name: Cross-Compile FFMPEG
-    needs: build-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -27,6 +17,8 @@ jobs:
       - name: Build FFMPEG
         run: |
           export TERM=xterm
+          sudo apt-get update
+          sudo apt-get upgrade
           chmod +x build-ffmpeg.sh
           bash build-ffmpeg.sh --build --compiler=gcc --latest --enable-gpl-and-non-free -j 4
         env:
