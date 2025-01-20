@@ -1932,12 +1932,27 @@ fi
 find_git_repo "11853176" "3" "T"
 if build "lilv" "$repo_version"; then
     download "https://gitlab.com/lv2/lilv/-/archive/v$repo_version/lilv-v$repo_version.tar.bz2" "lilv-$repo_version.tar.bz2"
-    extracmds=("-D"{docs,html,singlehtml,tests,tools}"=disabled")
-    execute meson setup build --prefix="$workspace" --buildtype=release --default-library=static --strip "${extracmds[@]}"
-    execute ninja "-j$threads" -C build
+    
+    # Setup build directory
+    execute meson setup build --prefix="$workspace" \
+                              --buildtype=release \
+                              --default-library=static \
+                              --strip \
+                              -Ddocs=disabled \
+                              -Dhtml=disabled \
+                              -Dsinglehtml=disabled \
+                              -Dtests=disabled \
+                              -Dtools=disabled
+    
+    # Build and install
+    execute ninja "-j${threads:-4}" -C build
     execute sudo ninja -C build install
+    
+    # Mark build as completed
     build_done "lilv" "$repo_version"
 fi
+
+# Add LV2 support to configuration options
 CONFIGURE_OPTIONS+=("--enable-lv2")
 
 git_caller "https://github.com/gypified/libmpg123.git" "libmpg123-git"
