@@ -47,16 +47,12 @@ jobs:
           sudo apt-get update
           xargs sudo apt-get -y install < packages.txt
           sudo apt-get install -y \
-            ragel cvs yasm pax nasm gperf autogen autoconf-archive build-essential \
             libsamplerate-dev \
             qtbase5-dev \
             libsndfile1-dev \
             gcc-mingw-w64-x86-64 \
             g++-mingw-w64-x86-64 \
             make \
-            meson \
-            ninja-build \
-            pkg-config \
             gcc \
             g++ \
             zlib1g-dev \
