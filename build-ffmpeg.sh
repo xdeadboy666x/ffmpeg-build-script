@@ -1582,18 +1582,9 @@ fi
 
 git_caller "https://gitlab.com/libtiff/libtiff.git" "libtiff-git"
 if build "$repo_name" "${version//\$ /}"; then
-    echo "Cloning \"$repo_name\" saving version \"$version\""
-    git_clone "$git_url" "libtiff-git"
-
-    # Clean previous build artifacts
-    make clean || true
-    rm -rf config.cache config.log
-
-    # Regenerate configuration files
-    autoupdate
-    autoreconf -fi
-
-    # Run autogen.sh and configure with proper flags
+    download "http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz" "libtiff-4.1.0.tar.gz"
+    execute autoupdate
+    execute autoreconf -fi
     execute ./autogen.sh
     execute ./configure --prefix="$workspace" \
                         --disable-docs --disable-sphinx --disable-tests --enable-cxx --with-pic \
