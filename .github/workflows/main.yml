@@ -39,14 +39,14 @@ jobs:
             cmake \
             wget \
             git
-          sudo -H pip3 -qq install meson ninja
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
       - name: Run Build Script
         run: |
           export TERM=xterm
+          sudo -H pip3 -qq install meson ninja
           chmod +x build-ffmpeg.sh
-          bash -x ./build-ffmpeg.sh --enable-gpl-and-non-free --latest
+          bash ./build-ffmpeg.sh --enable-gpl-and-non-free --latest
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
