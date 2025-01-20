@@ -16,18 +16,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          export TERM=xterm
-          xargs sudo apt-get -y install < packages.txt
           sudo apt-get update
           sudo apt-get install -y \
+            ragel cvs yasm pax nasm gperf autogen autoconf-archive \
             libsamplerate-dev \
             qtbase5-dev \
             libsndfile1-dev \
             gcc-mingw-w64-x86-64 \
             g++-mingw-w64-x86-64 \
             make \
-            yasm \
-            nasm \
             meson \
             ninja-build \
             pkg-config \
@@ -40,8 +37,12 @@ jobs:
             cmake \
             wget \
             git
+          sudo -H pip3 -qq install meson ninja
+
+      - name: Run Build Script
+        run: |
           chmod +x build-ffmpeg.sh
-          bash build-ffmpeg.sh --build --compiler=gcc --latest --enable-gpl-and-non-free -j 4
+          bash ./build-ffmpeg.sh --build --compiler=gcc --latest --enable-gpl-and-non-free -j 4
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
