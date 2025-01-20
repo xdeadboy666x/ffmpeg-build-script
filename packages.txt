@@ -1,33 +1,33 @@
-cargo-c
+
+autoconf
+autoconf-archive
+autogen
+automake
+autopoint
+cmake
+make
+pkg-config
+ninja-build
+meson
+ccache
+clang
+gcc
+g++
+gperf
+gettext
+git
+wget
+valgrind \
+libamd3
 libcamd3
-zlib1g-dev
-libjpeg-dev
-libjbig-dev
-liblzma-dev
-libzstd-dev
 libccolamd3
 libcholmod5
 libcolamd3
 libsuitesparseconfig7
 libumfpack6
 libfftw3-dev
-libjxl-dev
-libamd3
 libgegl-0.4-0t64
 libgoogle-perftools4t64
-openjdk-21-jdk-headless
-autopoint
-ccache
-clang
-gettext
-gperf
-imagemagick-6.q16
-meson
-ninja-build
-pkg-config
-jo
-jq
-ladspa-sdk
 libbluray-dev
 libbs2b-dev
 libcaca-dev
@@ -58,5 +58,26 @@ libx11-dev
 libxi-dev
 libyuv-dev
 libzvbi-dev
-valgrind
-xz-utils
+libzstd-dev
+libjpeg-dev
+libjbig-dev
+liblzma-dev
+libsamplerate-dev
+libsndfile1-dev
+libtool
+libzlib1g-dev
+zlib1g-dev \
+gcc-mingw-w64-x86-64
+g++-mingw-w64-x86-64
+ragel \
+imagemagick-6.q16
+qtbase5-dev
+libjxl-dev \
+openjdk-21-jdk-headless \
+jo
+jq
+ladspa-sdk
+xz-utils \
+pax
+yasm \
+cargo-c
