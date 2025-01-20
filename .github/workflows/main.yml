@@ -40,7 +40,8 @@ jobs:
             wget \
             git
           sudo -H pip3 -qq install meson ninja
-
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
       - name: Run Build Script
         run: |
           export TERM=xterm
