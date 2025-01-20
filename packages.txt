@@ -72,7 +72,7 @@ g++-mingw-w64-x86-64
 ragel
 imagemagick-6.q16
 qtbase5-dev
-libjxl-dev \
+libjxl-dev
 openjdk-21-jdk-headless
 jo
 jq
