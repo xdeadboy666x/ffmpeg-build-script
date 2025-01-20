@@ -47,8 +47,7 @@ jobs:
       - name: Run Build Script
         run: |
           export TERM=xterm
-          chmod +x build-ffmpeg.sh
-          bash ./"https://raw.githubusercontent.com/xdeadboy666x/ffmpeg-build-script/refs/heads/master/build-ffmpeg.sh" --enable-gpl-and-non-free --latest
+          bash ./ build-ffmpeg.sh --enable-gpl-and-non-free --latest
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
