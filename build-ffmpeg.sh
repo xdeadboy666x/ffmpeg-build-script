@@ -1586,7 +1586,7 @@ if build "$repo_name" "${version//\$ /}"; then
     git_clone "$git_url" "libtiff-git"
     mkdir -p config
     autoupdate
-    execute ./autogen.sh
+    autoreconf -fi
     execute ./configure --prefix="$workspace" --disable-{docs,sphinx,tests} --enable-cxx --with-pic
     execute make "-j$threads"
     execute sudo make install
