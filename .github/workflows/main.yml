@@ -19,9 +19,8 @@ jobs:
           export TERM=xterm
           sudo apt-get update
           xargs sudo apt-get -y install < packages.txt
-          
           sudo apt-get install -y \
-            ragel cvs yasm pax nasm gperf autogen autoconf-archive \
+            ragel cvs yasm pax nasm gperf autogen autoconf-archive build-essential \
             libsamplerate-dev \
             qtbase5-dev \
             libsndfile1-dev \
@@ -44,8 +43,9 @@ jobs:
 
       - name: Run Build Script
         run: |
+          export TERM=xterm
           chmod +x build-ffmpeg.sh
-          bash ./build-ffmpeg.sh --build --compiler=gcc --latest --enable-gpl-and-non-free -j 4
+          bash ./build-ffmpeg.sh --enable-gpl-and-non-free --latest
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
