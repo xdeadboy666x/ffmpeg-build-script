@@ -43,7 +43,10 @@ jobs:
         id: date-time-before
         run: |
           echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
-
+          
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.0
+        
       - name: Run Build Script
         run: |
           export TERM=xterm
