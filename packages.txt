@@ -10,6 +10,7 @@ libcholmod5
 libcolamd3
 libsuitesparseconfig7
 libumfpack6
+libfftw3-dev
 libjxl-dev
 libamd3
 libgegl-0.4-0t64
