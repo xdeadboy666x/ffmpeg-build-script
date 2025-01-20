@@ -1,5 +1,10 @@
 cargo-c
 libcamd3
+zlib1g-dev
+libjpeg-dev
+libjbig-dev
+liblzma-dev
+libzstd-dev
 libccolamd3
 libcholmod5
 libcolamd3
