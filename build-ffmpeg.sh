@@ -1584,12 +1584,26 @@ git_caller "https://gitlab.com/libtiff/libtiff.git" "libtiff-git"
 if build "$repo_name" "${version//\$ /}"; then
     echo "Cloning \"$repo_name\" saving version \"$version\""
     git_clone "$git_url" "libtiff-git"
-    mkdir -p config
+
+    # Clean previous build artifacts
+    make clean || true
+    rm -rf config.cache config.log
+
+    # Regenerate configuration files
     autoupdate
     autoreconf -fi
-    execute ./configure --prefix="$workspace" --disable-{docs,sphinx,tests} --enable-cxx --with-pic
+
+    # Run autogen.sh and configure with proper flags
+    execute ./autogen.sh
+    execute ./configure --prefix="$workspace" \
+                        --disable-docs --disable-sphinx --disable-tests --enable-cxx --with-pic \
+                        --enable-debug
+
+    # Build and install
     execute make "-j$threads"
     execute sudo make install
+
+    # Mark build as complete
     build_done "$repo_name" "$version"
 fi
 
