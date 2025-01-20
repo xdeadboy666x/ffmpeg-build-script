@@ -12,6 +12,9 @@ jobs:
         os:
           - win64
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.0
+        
       - name: Checkout FFmpeg
         uses: actions/checkout@v4
         with:
@@ -44,9 +47,6 @@ jobs:
         run: |
           echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
           
-      - name: Checkout Repository
-        uses: actions/checkout@v4.2.0
-        
       - name: Run Build Script
         run: |
           export TERM=xterm
