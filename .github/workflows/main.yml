@@ -13,7 +13,14 @@ jobs:
       matrix:
         os: [win64]
         
-    steps:         
+    steps:
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: FFmpeg/FFmpeg
+          persist-credentials: false
+          path: ffmpeg-source
+          
       - name: Install APT dependencies
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
@@ -80,9 +87,9 @@ jobs:
         with:
           name: ffmpeg-${{ matrix.os }}
           path: |
-            bin/ffmpeg.exe
-            bin/ffprobe.exe
-            bin/ffplay.exe
+            ffmpeg-source/ffmpeg.exe
+            ffmpeg-source/ffprobe.exe
+            ffmpeg-source/ffplay.exe
           if-no-files-found: error
           retention-days: ${{ inputs.no_release && '0' || '1' }}
           
