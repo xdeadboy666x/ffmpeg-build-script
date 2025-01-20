@@ -1808,7 +1808,8 @@ if "$NONFREE_AND_GPL"; then
     if build "$repo_name" "${version//\$ /}"; then
         echo "Cloning \"$repo_name\" saving version \"$version\""
         git_clone "$git_url"
-        execute make "-j$threads" PREFIX="$workspace" install-static
+        execute make "-j$threads" 
+        execute sudo make install-static PREFIX="$workspace"
         build_done "$repo_name" "$version"
     fi
     CONFIGURE_OPTIONS+=("--enable-librubberband")
