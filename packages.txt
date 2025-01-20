@@ -58,3 +58,4 @@ libxi-dev
 libyuv-dev
 libzvbi-dev
 valgrind
+xz-utils
