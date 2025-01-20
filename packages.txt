@@ -81,3 +81,12 @@ xz-utils \
 pax
 yasm \
 cargo-c
+cvs
+libjxl-dev
+nasm
+openjdk-21-jdk-headless
+ragel
+valgrind
+xz-utils
+yasm
+zlib1g-dev
