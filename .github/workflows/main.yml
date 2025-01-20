@@ -23,14 +23,16 @@ jobs:
         id: read-packages
         run: |
           packages=$(curl -s https://raw.githubusercontent.com/xdeadboy666x/ffmpeg-build-script/master/packages.txt | xargs)
-          echo "packages=\"${packages}\"" >> $GITHUB_ENV
+          echo "packages=${packages}" >> $GITHUB_ENV
         shell: bash
+
       - name: Install APT dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: "${{ env.packages }}"
+          packages: ${{ env.packages }}
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+
 
       - name: Install pip dependencies
         run: sudo -H pip3 -qq install meson ninja
