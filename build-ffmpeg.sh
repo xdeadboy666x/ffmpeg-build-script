@@ -1850,7 +1850,7 @@ if build "$repo_name" "${version//\$ /}"; then
     execute meson setup build --prefix="$workspace" --buildtype=release --default-library=static --strip \
                               -D{docs,tests}=disabled -Donline_docs=false -Dplugins="$lv2_switch"
     execute ninja "-j$threads" -C build
-    execute ninja -C build install
+    execute sudo ninja -C build install
     build_done "$repo_name" "$version"
 else
     # Set PYTHONPATH to include the virtual environment's site-packages directory
@@ -2610,7 +2610,7 @@ if "$NONFREE_AND_GPL"; then
                       -DUSE_OPENSSL_PC=ON -DENABLE_UNITTESTS=OFF -DENABLE_LOGGING=ON \
                       -DENABLE_HEAVY_LOGGING=OFF -G Ninja -Wno-dev
         execute ninja -C build "-j$threads"
-        execute ninja -C build "-j$threads" install
+        execute sudo ninja -C build "-j$threads" install
         if [[ -n "$LDEXEFLAGS" ]]; then
             sed -i.backup "s/-lgcc_s/-lgcc_eh/g" "$workspace/lib/pkgconfig/srt.pc"
         fi
