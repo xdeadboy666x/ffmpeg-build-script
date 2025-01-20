@@ -1584,6 +1584,8 @@ git_caller "https://gitlab.com/libtiff/libtiff.git" "libtiff-git"
 if build "$repo_name" "${version//\$ /}"; then
     echo "Cloning \"$repo_name\" saving version \"$version\""
     git_clone "$git_url" "libtiff-git"
+    mkdir -p config
+    chmod +x autogen.sh
     execute ./autogen.sh
     execute ./configure --prefix="$workspace" --disable-{docs,sphinx,tests} --enable-cxx --with-pic
     execute make "-j$threads"
