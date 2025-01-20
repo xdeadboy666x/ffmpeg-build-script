@@ -1580,10 +1580,10 @@ if build "libpng" "$repo_version"; then
     build_done "libpng" "$repo_version"
 fi
 
-git_caller "https://github.com/rouault/libtiff.git" "libtiff-git"
+git_caller "https://gitlab.com/libtiff/libtiff.git" "libtiff-git"
 if build "$repo_name" "${version//\$ /}"; then
     echo "Cloning \"$repo_name\" saving version \"$version\""
-    git_clone "$git_url"
+    git_clone "$git_url" "libtiff-git"
     execute ./autogen.sh
     execute ./configure --prefix="$workspace" --disable-{docs,sphinx,tests} --enable-cxx --with-pic
     execute make "-j$threads"
@@ -1604,7 +1604,6 @@ if "$NONFREE_AND_GPL"; then
     fi
     CONFIGURE_OPTIONS+=("--enable-libaribb24")
 fi
-
 
 find_git_repo "7950" "4"
 repo_version="${repo_version#VER-}"
