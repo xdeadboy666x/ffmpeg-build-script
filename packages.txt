@@ -17,7 +17,7 @@ gperf
 gettext
 git
 wget
-valgrind \
+valgrind
 libamd3
 libcamd3
 libccolamd3
@@ -66,20 +66,20 @@ libsamplerate-dev
 libsndfile1-dev
 libtool
 libzlib1g-dev
-zlib1g-dev \
+zlib1g-dev
 gcc-mingw-w64-x86-64
 g++-mingw-w64-x86-64
-ragel \
+ragel
 imagemagick-6.q16
 qtbase5-dev
 libjxl-dev \
-openjdk-21-jdk-headless \
+openjdk-21-jdk-headless
 jo
 jq
 ladspa-sdk
-xz-utils \
+xz-utils
 pax
-yasm \
+yasm
 cargo-c
 cvs
 libjxl-dev
