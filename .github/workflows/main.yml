@@ -44,8 +44,6 @@ jobs:
         run: |
           export TERM=xterm
           bash ./build-ffmpeg.sh --enable-gpl-and-non-free --latest
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Get current date & time after build
         id: date-time-after
