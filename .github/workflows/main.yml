@@ -52,7 +52,6 @@ jobs:
         run: |
           echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
           echo "date-time-tag=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
-
       - name: Upload FFmpeg binaries
         uses: actions/upload-artifact@v4
         with:
@@ -87,12 +86,10 @@ jobs:
         run: |
           echo "This version of ffmpeg has nonfree parts compiled in." > LICENSE
           echo "Therefore it is not legally redistributable." >> LICENSE
-
       - name: 7-Zip FFmpeg binaries
         run: |
           7z a -mx9 "ffmpeg-${{ needs.build.outputs.git-date }}-${{ matrix.os }}-nonfree.7z" \
           ffmpeg.exe ffprobe.exe ffplay.exe LICENSE
-
       - name: Upload FFmpeg archive
         uses: actions/upload-artifact@v4
         with:
