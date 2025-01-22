@@ -1,55 +1,120 @@
-name: Build FFmpeg with Meson and Ninja
-
+name: Cross-Compile FFmpeg for x64 Win
 on:
-  workflow_dispatch:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
+      - master
+  workflow_dispatch:
 jobs:
-  build-ffmpeg:
-    runs-on: ubuntu-latest
-
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os:
+          - win64
     steps:
-      # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v4.2.0
-
-      # Cache system dependencies
-      - name: Cache System Dependencies
-        uses: actions/cache@v3
+        
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
         with:
-          path: /tmp/mingw-w64
-          key: ${{ runner.os }}-mingw-w64-${{ hashFiles('**/build-ffmpeg.sh') }}
-          restore-keys: |
-            ${{ runner.os }}-mingw-w64-
+          repository: FFmpeg/FFmpeg
+          persist-credentials: false
+          path: ffmpeg-source
 
-      # Install required dependencies
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential yasm pkg-config git \
-            mingw-w64 cmake nasm python3 python3-pip ninja-build meson \
-    
-      # Set up MinGW environment for cross-compilation
-      - name: Set up MinGW for Windows Cross-Compilation
-        run: |
-          export PATH=/usr/x86_64-w64-mingw32/bin:$PATH
-          export CROSS_PREFIX=x86_64-w64-mingw32-
-          echo "MinGW cross-compiler setup completed"
+      - name: Install APT dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: autoconf autopoint bison build-essential ccache clang cmake curl flex gettext git gperf imagemagick-6.q16 ladspa-sdk libbluray-dev libbs2b-dev libcaca-dev libcdio-dev libcdio-paranoia-dev libcdparanoia-dev libchromaprint-dev libdav1d-dev libgl1-mesa-dev libglu1-mesa-dev libgme-dev libgsm1-dev libjack-dev libmodplug-dev libnghttp2-dev libnghttp3-dev libshine-dev libsmbclient-dev libsnappy-dev libspeex-dev libssh-dev libssl-dev libtesseract-dev libtool libtwolame-dev libv4l-dev libvo-amrwbenc-dev libvpl-dev libx11-dev libxi-dev libyuv-dev libzvbi-dev nvidia-driver python3 python3-dev python3-venv valgrind python3-pip
+          
+      - name: Install pip dependencies
+        run: sudo -H pip3 -qq install meson ninja
+        
+      - name: Get current FFmpeg git date
+        id: git-date
+        working-directory: ffmpeg-source
+        run: echo "git-date=$(git log -1 --format=%ci)" >> $GITHUB_OUTPUT
 
-      # Run FFmpeg Build Scripta)
-      - name: Run FFmpeg Build Script
+      - name: Get current date & time before build
+        id: date-time-before
+        run: |
+          echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
+          
+      - name: Run Build Script
         run: |
           export TERM=xterm
-          bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --compiler=gcc
+          bash ./build-ffmpeg.sh --build-ffmpeg-static=y --ffmpeg-git-checkout-version=master --gcc-cpu-count=4  --build-intel-qsv=y --build-svt-vp9=y --compiler-flavors=win64 --build-amd-amf=y
 
-      # Store the build artifacts (Windows executables)
-      - name: Upload Windows Executables
-        uses: actions/upload-artifact@v3
+      - name: Get current date & time after build
+        id: date-time-after
+        run: |
+          echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
+          echo "date-time-tag=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+      - name: Upload FFmpeg binaries
+        uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-windows-executables
-          path: ffmpeg-build-script/ffmpeg*/ffmpeg.exe
+          name: ffmpeg-${{ matrix.os }}
+          path: |
+            ffmpeg-source/ffmpeg.exe
+            ffmpeg-source/ffprobe.exe
+            ffmpeg-source/ffplay.exe
+          if-no-files-found: error
+          retention-days: 1
+    outputs:
+      date-time-before: "${{ steps.date-time-before.outputs.date-time }}"
+      date-time-after: "${{ steps.date-time-after.outputs.date-time }}"
+      date-time-after-tag: "${{ steps.date-time-after.outputs.date-time-tag }}"
+      git-date: "${{ steps.git-date.outputs.git-date }}"
+
+  archive:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - win64
+    steps:
+      - name: Download FFmpeg binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: "ffmpeg-${{ matrix.os }}"
+
+      - name: Create LICENSE
+        run: |
+          echo "This version of ffmpeg has nonfree parts compiled in." > LICENSE
+          echo "Therefore it is not legally redistributable." >> LICENSE
+      - name: 7-Zip FFmpeg binaries
+        run: |
+          7z a -mx9 "ffmpeg-${{ needs.build.outputs.git-date }}-${{ matrix.os }}-nonfree.7z" \
+          ffmpeg.exe ffprobe.exe ffplay.exe LICENSE
+      - name: Upload FFmpeg archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: "ffmpeg-archive-${{ matrix.os }}"
+          path: "ffmpeg-${{ needs.build.outputs.git-date }}-${{ matrix.os }}-nonfree.7z"
+          retention-days: 1
+
+  release:
+    needs:
+      - build
+      - archive
+    if: "! inputs.no_release"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download FFmpeg archives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "ffmpeg-archive-*"
+          merge-multiple: true
+
+      - name: Release FFmpeg archives
+        run: |
+          gh release create "${{ needs.build.outputs.date-time-after-tag }}-${{ needs.build.outputs.git-date }}" \
+          ffmpeg-${{ needs.build.outputs.git-date }}-win64-nonfree.7z \
+          -n "FFmpeg nonfree git-${{ needs.build.outputs.git-date }} built on ${{
+          needs.build.outputs.date-time-after }}" \
+          -t "${{ needs.build.outputs.date-time-after }}"
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_REPO: ${{ github.repository }}
