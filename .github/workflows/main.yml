@@ -43,7 +43,7 @@ jobs:
       - name: Run Build Script
         run: |
           export TERM=xterm
-          sudo apt update && sudo apt-get install subversion ragel curl texinfo g++ ed bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson clang python3-distutils python-is-python3 -y
+          sudo apt-get install subversion ragel curl texinfo g++ ed bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson clang python3-distutils python-is-python3 -y
           bash ./build-ffmpeg.sh --build-ffmpeg-static=y --ffmpeg-git-checkout-version=master --gcc-cpu-count=4  --build-intel-qsv=y --build-svt-vp9=y --compiler-flavors=win64 --build-amd-amf=y
 
       - name: Get current date & time after build
