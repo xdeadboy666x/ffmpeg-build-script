@@ -1,4 +1,4 @@
-name: Cross-Compile FFmpeg for x64 Win
+name: Cross-Compile FFmpeg for x64 Win 2
 on:
   push:
     branches:
