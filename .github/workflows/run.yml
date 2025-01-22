@@ -43,7 +43,7 @@ jobs:
       - name: Run Build Script
         run: |
           export TERM=xterm
-          bash ./build-ffmpeg.sh --build-ffmpeg-static=y --ffmpeg-git-checkout-version=master --gcc-cpu-count=4  --build-intel-qsv=y --build-svt-vp9=y --compiler-flavors=win64 --build-amd-amf=y
+          bash ./buuild2.sh --build-ffmpeg-static=y --ffmpeg-git-checkout-version=master --gcc-cpu-count=4  --build-intel-qsv=y --build-svt-vp9=y --compiler-flavors=win64 --build-amd-amf=y
 
       - name: Get current date & time after build
         id: date-time-after
