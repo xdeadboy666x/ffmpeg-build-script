@@ -15,13 +15,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4.2.0
         
-      - name: Checkout FFmpeg
-        uses: actions/checkout@v4
-        with:
-          repository: FFmpeg/FFmpeg
-          persist-credentials: false
-          path: ffmpeg-source
-
       - name: Install APT dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
@@ -31,6 +24,7 @@ jobs:
         run: |
           export TERM=xterm
           sudo -H pip3 -qq install meson ninja
+          sudo apt-get install subversion ragel curl texinfo g++ ed bison flex cvs yasm automake libtool autoconf gcc cmake git make pkg-config zlib1g-dev unzip pax nasm gperf autogen bzip2 autoconf-archive p7zip-full meson clang python3-distutils python-is-python3 -y
         
       - name: Get current FFmpeg git date
         id: git-date
@@ -41,7 +35,14 @@ jobs:
         id: date-time-before
         run: |
           echo "date-time=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
-          
+      
+      - name: Checkout FFmpeg
+        uses: actions/checkout@v4
+        with:
+          repository: FFmpeg/FFmpeg
+          persist-credentials: false
+          path: ffmpeg-source
+
       - name: Run Build Script
         run: |
           export TERM=xterm
