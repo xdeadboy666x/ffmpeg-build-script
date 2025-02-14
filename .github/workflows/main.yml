@@ -42,8 +42,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.TOKEN_REPO }}
 
-      - name: Get ffmpeg-autobuild latest build
-        id: ffmpeg-autobuild-info
+      - name: Get ffmpeg-build-script latest build
+        id: ffmpeg-build-script-info
         run: |
           tag_name=$(gh api repos/$GITHUB_REPOSITORY/releases/latest -q .tag_name)
           echo git-sha=${tag_name:17:7} >> $GITHUB_OUTPUT
@@ -54,8 +54,8 @@ jobs:
       - name: Check if there is newer commit
         if: '! inputs.force_build'
         run: >
-          [[ "${{ steps.ffmpeg-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-autobuild-info.outputs.git-sha }}" ]] ||
-          [[ "${{ steps.ffmpeg-helper-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-autobuild-info.outputs.helper-git-sha }}" ]]
+          [[ "${{ steps.ffmpeg-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-build-script-info.outputs.git-sha }}" ]] ||
+          [[ "${{ steps.ffmpeg-helper-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-build-script-info.outputs.helper-git-sha }}" ]]
 
     outputs:
       git-sha: ${{ steps.ffmpeg-info.outputs.git-sha }}
@@ -94,7 +94,7 @@ jobs:
           packages: subversion python-is-python3 libfreetype-dev libgnutls-dev libmp3lame-dev libsdl2-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev ragel build-essential libass-dev autoconf automake curl texinfo libpulse-dev llvm g++ ed bison flex cvs yasm cmake git libqrencode-dev make pkg-config zlib1g-dev unzip pax nasm gperf libunistring-dev libaom-dev libdav1d-dev autogen bzip2 autoconf-archive p7zip-full meson clang gettext libpng-dev autotools-dev patch wget xz-utils coreutils libx264-dev libx265-dev libfdk-aac-dev libopus-dev
       
       - name: Install pip dependencies
-        run: pip -q install  -r https://raw.githubusercontent.com/xdeadboy666x/ffmpeg-autobuild/refs/heads/main/requirements.txt --upgrade --user
+        run: pip -q install  -r https://raw.githubusercontent.com/xdeadboy666x/ffmpeg-build-script/refs/heads/main/requirements.txt --upgrade --user
 
       - name: Get current FFmpeg git date
         id: git-date
