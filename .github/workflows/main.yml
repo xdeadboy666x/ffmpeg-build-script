@@ -26,13 +26,6 @@ jobs:
         os: [win64]
 
     steps:
-
-      - name: Checkout FFmpeg
-        uses: actions/checkout@v4
-        with:
-          repository: FFmpeg/FFmpeg
-          persist-credentials: false
-          path: ffmpeg-source
           
       - name: Install APT dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
