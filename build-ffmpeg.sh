@@ -25,16 +25,16 @@
 ##
 ####################################################################################
 
-echo "$ sudo apt-get update && sudo apt-get install -y subversion python-is-python3 libfreetype-dev libgnutls-dev libmp3lame-dev libsdl2-dev \
+execute sudo apt-get install -y subversion python-is-python3 libfreetype-dev libgnutls-dev libmp3lame-dev libsdl2-dev \
 libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev ragel build-essential \
 libass-dev autoconf automake curl texinfo libpulse-dev llvm g++ ed bison flex cvs yasm cmake git libqrencode-dev \
 make pkg-config zlib1g-dev unzip pax nasm gperf libunistring-dev libaom-dev libdav1d-dev autogen bzip2 \
-autoconf-archive p7zip-full meson clang gettext patch wget xz-utils ninja-build coreutils"
+autoconf-archive p7zip-full meson clang gettext patch wget xz-utils ninja-build coreutils zlib1g-dev liblzma-dev liblz4-dev
 
-if [[ "$EUID" -eq 0 ]]; then
-    echo "You must run this script without root or sudo."
-    exit 1
-fi
+## if [[ "$EUID" -eq 0 ]]; then
+##    echo "You must run this script without root or sudo."
+##    exit 1
+##fi
 
 # Define global variables
 script_name="${0##*/}"
@@ -1435,13 +1435,10 @@ fi
 find_git_repo "facebook/zstd" "1" "T"
 if build "libzstd" "$repo_version"; then
     execute sudo apt update && sudo apt-get install build-essential zlib1g-dev liblzma-dev liblz4-dev
-    download "https://github.com/facebook/zstd/archive/refs/tags/v1.5.6.tar.gz" "libzstd-1.5.6.tar.gz"
-    cd "build/meson" || exit 1
-    execute meson setup build --prefix="$workspace" \
-                              --buildtype=release \
-                              --default-library=both \
-                              --strip \
-                              -Dbin_tests=false
+    download "https://github.com/facebook/zstd/archive/refs/tags/v$repo_version.tar.gz" "libzstd-$repo_version.tar.gz"
+    cd "build/meson"
+    execute meson setup build --prefix="$workspace" --buildtype=release \
+                              --default-library=static --strip -Dbin_programs=true
     execute ninja "-j$threads" -C build
     execute sudo ninja -C build install
     build_done "libzstd" "$repo_version"
