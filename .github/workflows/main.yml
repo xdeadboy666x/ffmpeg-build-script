@@ -35,17 +35,6 @@ jobs:
       - name: Install pip dependencies
         run: pip install  -r https://raw.githubusercontent.com/xdeadboy666x/ffmpeg-build-script/refs/heads/master/packages.txt --upgrade --user
 
-      - name: Get current FFmpeg git date
-        id: git-date
-        working-directory: ffmpeg-source
-        run: |
-          echo git-date=$(git log -1 --format=%ci) >> $GITHUB_OUTPUT
-
-      - name: Get current date & time before build
-        id: date-time-before
-        run: |
-          echo date-time=$(date +'%Y-%m-%d %H:%M') >> $GITHUB_OUTPUT
-          
       - name: Cache FFmpeg builds
         id: cache-ffmpeg
         uses: actions/cache@v4
@@ -59,7 +48,7 @@ jobs:
       - name: Compile FFmpeg ${{ needs.check.outputs.git-sha-short }} using ffmpeg-build-script ${{ needs.check.outputs.helper-git-sha-short }}
         run: |
           export TERM=xterm
-          bash build-ffmpeg.sh --build --enable-gpl-and-non-free --compiler=gcc --jobs 4
+          bash ./build-ffmpeg.sh --build --enable-gpl-and-non-free --compiler=gcc --jobs 4
 
       - name: Install Wine
         run: sudo apt-get install -y wine64
