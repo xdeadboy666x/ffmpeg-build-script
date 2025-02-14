@@ -19,72 +19,18 @@ concurrency:
   group: ${{ github.workflow }}
   
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get FFmpeg latest commit
-        id: ffmpeg-info
-        run: |
-          git_sha=$(gh api repos/FFmpeg/FFmpeg/commits/master -q .sha)
-          echo git-sha=$git_sha >> $GITHUB_OUTPUT
-          echo git-sha-short=${git_sha::7} >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.TOKEN_REPO }}
-
-      - name: Get ${{ inputs.use_own_fork && github.repository_owner || 'xdeadboy666x' }}/ffmpeg-build-script latest commit
-        id: ffmpeg-helper-info
-        run: |
-          git_owner=${{ inputs.use_own_fork && github.repository_owner || 'xdeadboy666x' }}
-          git_sha=$(gh api repos/$git_owner/ffmpeg-build-script/commits/master -q .sha)
-          echo git-owner=$git_owner >> $GITHUB_OUTPUT
-          echo git-sha=$git_sha >> $GITHUB_OUTPUT
-          echo git-sha-short=${git_sha::7} >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.TOKEN_REPO }}
-
-      - name: Get ffmpeg-build-script latest build
-        id: ffmpeg-build-script-info
-        run: |
-          tag_name=$(gh api repos/$GITHUB_REPOSITORY/releases/latest -q .tag_name)
-          echo git-sha=${tag_name:17:7} >> $GITHUB_OUTPUT
-          echo helper-git-sha=${tag_name:25:7} >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.TOKEN_REPO }}
-
-      - name: Check if there is newer commit
-        if: '! inputs.force_build'
-        run: >
-          [[ "${{ steps.ffmpeg-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-build-script-info.outputs.git-sha }}" ]] ||
-          [[ "${{ steps.ffmpeg-helper-info.outputs.git-sha-short }}" != "${{ steps.ffmpeg-build-script-info.outputs.helper-git-sha }}" ]]
-
-    outputs:
-      git-sha: ${{ steps.ffmpeg-info.outputs.git-sha }}
-      git-sha-short: ${{ steps.ffmpeg-info.outputs.git-sha-short }}
-      helper-git-owner: ${{ steps.ffmpeg-helper-info.outputs.git-owner }}
-      helper-git-sha: ${{ steps.ffmpeg-helper-info.outputs.git-sha }}
-      helper-git-sha-short: ${{ steps.ffmpeg-helper-info.outputs.git-sha-short }}
-
   build:
-    needs: check
     runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [win64]
 
     steps:
-      - name: Checkout ${{ needs.check.outputs.helper-git-owner }}/ffmpeg-build-script
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ needs.check.outputs.helper-git-owner }}/ffmpeg-build-script
-          ref: ${{ needs.check.outputs.helper-git-sha }}
-          persist-credentials: false
-
 
       - name: Checkout FFmpeg
         uses: actions/checkout@v4
         with:
           repository: FFmpeg/FFmpeg
-          ref: ${{ needs.check.outputs.git-sha }}
           persist-credentials: false
           path: ffmpeg-source
           
@@ -156,7 +102,7 @@ jobs:
     permissions:
       id-token: write
       attestations: write
-    needs: [check, build]
+    needs: [build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -196,7 +142,7 @@ jobs:
           retention-days: ${{ inputs.no_release && '0' || '1' }}
           compression-level: 0
   release:
-    needs: [check, build, archive]
+    needs: [build, archive]
     if: '! inputs.no_release'
     runs-on: ubuntu-latest
     steps:
