@@ -1890,11 +1890,10 @@ fi
 find_git_repo "pcre2project/pcre2" "1" "T"
 repo_version="${repo_version//2-/}"
 if build "pcre2" "$repo_version"; then
+    execute sudo apt update && sudo apt-get install valgrind jit
     download "https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-$repo_version.tar.gz" "pcre2-$repo_version.tar.gz"
-    execute autoupdate
-    execute ./autogen.sh
-    execute ./configure --prefix="$workspace" \
-                        --enable-{jit,valgrind} \
+    execute LDFLAGS=--static ./configure --prefix="$workspace" \
+                        --enable-jit --enable-valgrind \
                         --disable-shared
     execute make "-j$threads"
     execute sudo make install
