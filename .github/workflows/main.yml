@@ -111,7 +111,7 @@ jobs:
         id: cache-ffmpeg
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/sandbox
+          path: ${{ github.workspace }}/
           key: FFmpeg-${{ runner.os }}-${{ env.CACHE_KEY }}-${{ needs.check.outputs.helper-git-sha-short }}
           restore-keys: |
             FFmpeg-${{ runner.os }}-${{ env.CACHE_KEY }}-
@@ -120,7 +120,7 @@ jobs:
       - name: Compile FFmpeg ${{ needs.check.outputs.git-sha-short }} using ffmpeg-build-script ${{ needs.check.outputs.helper-git-sha-short }}
         run: |
           export TERM=xterm
-          bash ./cross_compile_ffmpeg.sh --ffmpeg-source-dir=$GITHUB_WORKSPACE/ffmpeg-source --gcc-cpu-count=$(nproc) --disable-nonfree=n --sandbox-ok=y --compiler-flavors=${{ matrix.os }}
+          bash build-ffmpeg.sh --build --enable-gpl-and-non-free --compiler=gcc --jobs 4
 
       - name: Install Wine
         run: sudo apt-get install -y wine64
