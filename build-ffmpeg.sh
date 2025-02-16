@@ -1944,7 +1944,9 @@ if build "lilv" "$repo_version"; then
     download "https://gitlab.com/lv2/lilv/-/archive/v$repo_version/lilv-v$repo_version.tar.bz2" "lilv-$repo_version.tar.bz2"
     
     # Setup build directory
-    execute meson setup build --prefix="$workspace" \
+    execute meson setup build
+    cd build
+    execute meson configure --prefix="$workspace" \
                               --buildtype=release \
                               --default-library=static \
                               --strip \
